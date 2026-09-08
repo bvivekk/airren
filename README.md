@@ -19,4 +19,6 @@ npm run build
 
 ## Preview
 
-A Vercel preview URL will land in this file after PR-D deploys. Production stays unpromoted.
+Preview: [https://airren-rjk1995ig-bvivekks-projects.vercel.app](https://airren-rjk1995ig-bvivekks-projects.vercel.app)
+
+Production was not promoted. The older production deploy is unchanged.
