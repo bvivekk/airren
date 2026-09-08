@@ -21,10 +21,10 @@ export type Home = {
   beds: number;
   baths: number;
   guests: number;
-  nightlyRateCents: number;
+  nightlyRatePaise: number;
   rating: number;
   reviewCount: number;
-  savingsCents: number;
+  savingsPaise: number;
   badges: HomeBadge[];
   categoryIds: string[];
   photos: HomePhoto[];
