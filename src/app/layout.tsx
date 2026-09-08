@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
 import type { ReactNode } from "react";
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme="light" className={`${instrument.variable} h-full antialiased`}>
       <body className={`${instrument.className} group/body min-h-full bg-white font-sans text-foreground`} data-fixed="true">
-        <SiteChrome>{children}</SiteChrome>
+        <ClerkProvider>
+          <SiteChrome>{children}</SiteChrome>
+        </ClerkProvider>
       </body>
     </html>
   );
