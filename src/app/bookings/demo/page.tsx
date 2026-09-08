@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getHome } from "@/data/homes";
 import { nightsBetween } from "@/lib/dates";
 import { formatInr } from "@/lib/money";
 import { quoteStay } from "@/lib/pricing";
 import { parseStayQuery } from "@/lib/query";
+import { getHomeBySlug } from "@/lib/homes-repo";
+import { createServerClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 export default async function BookingDemoPage({
   searchParams,
@@ -13,7 +16,7 @@ export default async function BookingDemoPage({
 }) {
   const params = await searchParams;
   const slug = typeof params.slug === "string" ? params.slug : "";
-  const home = getHome(slug);
+  const home = await getHomeBySlug(createServerClient(), slug);
   if (!home) {
     notFound();
   }

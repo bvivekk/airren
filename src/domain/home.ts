@@ -14,6 +14,7 @@ export type HomePhoto = {
 };
 
 export type Home = {
+  id: string;
   slug: string;
   name: string;
   type: string;

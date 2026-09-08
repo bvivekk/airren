@@ -2,13 +2,12 @@ import { notFound } from "next/navigation";
 import { PhotoGrid } from "@/components/PhotoGrid";
 import { BookingCard } from "@/components/BookingCard";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { getHome, HOMES } from "@/data/homes";
 import { parseStayQuery } from "@/lib/query";
 import { badgeLabel } from "@/domain/home";
+import { getHomeBySlug } from "@/lib/homes-repo";
+import { createServerClient } from "@/lib/supabase/server";
 
-export function generateStaticParams() {
-  return HOMES.map((home) => ({ slug: home.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -16,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const home = getHome(slug);
+  const home = await getHomeBySlug(createServerClient(), slug);
   return { title: home?.name ?? "Home" };
 }
 
@@ -28,7 +27,7 @@ export default async function HomeDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
-  const home = getHome(slug);
+  const home = await getHomeBySlug(createServerClient(), slug);
   if (!home) {
     notFound();
   }

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/data/categories";
-import { HOMES } from "@/data/homes";
+import { listHomes } from "@/lib/homes-repo";
+import { createServerClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Locations" };
+export const dynamic = "force-dynamic";
 
 const PAGES = [
   { href: "/about", label: "About" },
@@ -17,7 +19,8 @@ const PAGES = [
   { href: "/travel-agents", label: "Travel Agents" },
 ];
 
-export default function LocationsPage() {
+export default async function LocationsPage() {
+  const homes = await listHomes(createServerClient());
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <h1 className="text-5xl font-semibold tracking-tight">Locations</h1>
@@ -45,7 +48,7 @@ export default function LocationsPage() {
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Properties</h2>
         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-          {HOMES.map((home) => (
+          {homes.map((home) => (
             <Link key={home.slug} href={`/homes/${home.slug}`} className="text-link">
               {home.name}~{home.location.city}~{home.beds} beds
             </Link>

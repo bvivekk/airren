@@ -5,6 +5,7 @@ import { filterHomes } from "./search.ts";
 
 const sample: Home[] = [
   {
+    id: "home-stowe",
     slug: "stowe",
     name: "Sterling Canopy",
     type: "Home",
@@ -23,6 +24,7 @@ const sample: Home[] = [
     description: "",
   },
   {
+    id: "home-tiny",
     slug: "tiny",
     name: "Tiny Cabin",
     type: "Home",

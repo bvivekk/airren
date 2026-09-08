@@ -1,7 +1,10 @@
-import { HOMES } from "@/data/homes";
 import { PropertyCard } from "@/components/PropertyCard";
 import { filterHomes } from "@/lib/search";
 import { parseStayQuery } from "@/lib/query";
+import { listHomes } from "@/lib/homes-repo";
+import { createServerClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 export default async function SearchPage({
   searchParams,
@@ -10,7 +13,7 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const query = parseStayQuery(params);
-  const homes = filterHomes(HOMES, query);
+  const homes = filterHomes(await listHomes(createServerClient()), query);
 
   return (
     <main className="page-container py-10">
