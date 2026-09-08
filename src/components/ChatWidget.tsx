@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const REPLIES: { match: string; reply: string }[] = [
-  { match: "book", reply: "Pick dates on a home and hit Reserve. This demo never charges a card." },
+  { match: "book", reply: "Pick dates on a home and hit Reserve. Razorpay takes the payment in INR." },
   { match: "wifi", reply: "The house tablet has the Wi-Fi name and password on the home screen." },
   { match: "check", reply: "Arrival is 4pm. Checkout has no chores. Leave the keys in the door." },
   { match: "help", reply: "The help center is at /help. I can also take a note for concierge." },

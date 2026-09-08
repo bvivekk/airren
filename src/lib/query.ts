@@ -29,24 +29,3 @@ export function parseStayQuery(params: ParamMap): StayQuery {
     guests: parseGuests(first(params.who) || first(params.guests)),
   };
 }
-
-export function stayQueryToParams(query: StayQuery): URLSearchParams {
-  const params = new URLSearchParams();
-  if (query.where) {
-    params.set("where", query.where);
-  }
-  params.set("checkIn", query.checkIn);
-  params.set("checkOut", query.checkOut);
-  params.set("who", String(query.guests));
-  return params;
-}
-
-export function searchHref(query: StayQuery): string {
-  return `/search?${stayQueryToParams(query).toString()}`;
-}
-
-export function bookingHref(slug: string, query: StayQuery): string {
-  const params = stayQueryToParams(query);
-  params.set("slug", slug);
-  return `/bookings/demo?${params.toString()}`;
-}

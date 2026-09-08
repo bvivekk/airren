@@ -14,7 +14,7 @@ export type HelpArticle = {
 export const HELP_COLLECTIONS: HelpCollection[] = [
   { slug: "home-manual", title: "Home Manual", blurb: "How the house works once you have the keys." },
   { slug: "payments", title: "Payments, pricing, and refunds", blurb: "What you pay, when, and how refunds move." },
-  { slug: "searching", title: "Searching and booking", blurb: "Dates, guests, and how a hold is placed." },
+  { slug: "searching", title: "Searching and booking", blurb: "Dates, guests, and how a stay is reserved." },
   { slug: "account", title: "Account", blurb: "Sign in, saved homes, and trip details." },
   { slug: "your-trip", title: "Your trip", blurb: "Arrival, concierge, and what happens at checkout." },
 ];
@@ -41,8 +41,8 @@ export const HELP_ARTICLES: HelpArticle[] = [
   {
     slug: "refunds",
     collection: "payments",
-    title: "Refunds on a demo hold",
-    body: "This site does not charge a card. A demo hold can be dropped anytime. Live refunds will follow the listing policy.",
+    title: "Refunds after a captured payment",
+    body: "A stay is confirmed only after Razorpay captures payment. Refunds follow the listing policy once a payment is captured.",
   },
   {
     slug: "search-tips",
@@ -51,16 +51,16 @@ export const HELP_ARTICLES: HelpArticle[] = [
     body: "Where matches city or region. Who is compared to the max guest count. Dates change the night count and the stay total.",
   },
   {
-    slug: "demo-reserve",
+    slug: "reserve",
     collection: "searching",
     title: "What Reserve does here",
-    body: "Reserve writes a confirmation page. No payment is taken. You can screenshot it or start over with new dates.",
+    body: "Reserve opens Razorpay Checkout in INR. The stay is confirmed only after payment.captured matches the quoted total.",
   },
   {
     slug: "sign-in",
     collection: "account",
-    title: "Demo sign in",
-    body: "Sign in stores a name on this browser. There is no password vendor. Clearing site data signs you out.",
+    title: "Sign in",
+    body: "Sign in with a phone OTP or email. Favorites stay in this browser even after you sign out.",
   },
   {
     slug: "saved-homes",

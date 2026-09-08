@@ -46,6 +46,13 @@ export function MenuDrawer() {
           {isSignedIn && user ? (
             <>
               <p className="rounded-lg px-3 py-2.5 text-[15px] font-semibold">Signed in as {guestLabel(user)}</p>
+              <Link
+                href="/bookings"
+                className="rounded-lg px-3 py-2.5 text-[15px] text-foreground"
+                onClick={() => setMenuOpen(false)}
+              >
+                My trips
+              </Link>
               <button
                 type="button"
                 className="rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold"
