@@ -1,3 +1,24 @@
 # Airren
 
-Guest-first luxury stays. The product lands through stacked pull requests.
+Luxury stays with a guest-first loop. Search, open a home, and place a demo hold. No payments.
+
+## Local
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+## Preview
+
+Preview: [https://airren-rjk1995ig-bvivekks-projects.vercel.app](https://airren-rjk1995ig-bvivekks-projects.vercel.app)
+
+Production was not promoted. The older production deploy is unchanged.
