@@ -3,6 +3,7 @@
 import { useSession } from "@clerk/nextjs";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { useMemo } from "react";
+import { clerkSupabaseJwtTemplate } from "@/lib/clerk-supabase";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -29,7 +30,7 @@ export function useSupabaseClient(): SupabaseClient {
         if (!session) {
           return null;
         }
-        return (await session.getToken()) ?? null;
+        return (await session.getToken({ template: clerkSupabaseJwtTemplate })) ?? null;
       }),
     [session],
   );

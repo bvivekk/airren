@@ -1,6 +1,6 @@
 import { PropertyCard } from "@/components/PropertyCard";
 import { filterHomes } from "@/lib/search";
-import { parseStayQuery } from "@/lib/query";
+import { parseStayQuery, stayWhenLabel, stayWhoLabel } from "@/lib/query";
 import { listHomes } from "@/lib/homes-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -21,7 +21,7 @@ export default async function SearchPage({
         {homes.length} {homes.length === 1 ? "home" : "homes"}
       </h1>
       <p className="mt-1 text-sm text-muted">
-        {query.where ? query.where : "Anywhere"} · {query.checkIn} – {query.checkOut} · {query.guests} guests
+        {query.where ? query.where : "Anywhere"} · {stayWhenLabel(query)} · {stayWhoLabel(query)}
       </p>
       {homes.length === 0 ? (
         <p className="mt-12 text-muted">No homes match those dates and guests. Try fewer people or another place.</p>

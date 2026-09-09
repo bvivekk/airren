@@ -109,7 +109,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '7546370e-b195-51a0-a5ca-3c6f7ca82b7f',
-  'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdbc?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1800&q=80',
   'Screened porch over the water',
   3
 );
@@ -213,25 +213,25 @@ insert into homes (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '795c370f-8c37-5767-9f5b-65a29a8f73dd',
-  'https://images.unsplash.com/photo-1564013799907-f663824623d0?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1800&q=80',
   'Oceanfront house with a long pool',
   0
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '795c370f-8c37-5767-9f5b-65a29a8f73dd',
-  'https://images.unsplash.com/photo-1600047509358-9dc75590d6a3?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1800&q=80',
   'Living room opening to the Pacific',
   1
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '795c370f-8c37-5767-9f5b-65a29a8f73dd',
-  'https://images.unsplash.com/photo-1600210492493-859ea5ce32b0?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1800&q=80',
   'Terrace dining over the water',
   2
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '795c370f-8c37-5767-9f5b-65a29a8f73dd',
-  'https://images.unsplash.com/photo-1600607687644-c7171b42498b?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1800&q=80',
   'Spa bathroom with ocean light',
   3
 );
@@ -353,7 +353,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   'edc97f80-6a35-5ae5-95cb-ebeaa5a60f67',
-  'https://images.unsplash.com/photo-1600210491369-e753d80a33f0?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1800&q=80',
   'Dock at golden hour',
   3
 );
@@ -408,7 +408,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '7105c701-8346-5ef1-be90-f0377bf10dc3',
-  'https://images.unsplash.com/photo-1600566752547-2f2313c76062?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1800&q=80',
   'Reading nook in timber',
   2
 );
@@ -524,7 +524,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   'e53b7f32-929a-57ef-baa6-1fa23495670b',
-  'https://images.unsplash.com/photo-1564013799907-f663824623d0?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1800&q=80',
   'Pool and lawn',
   1
 );
@@ -536,7 +536,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   'e53b7f32-929a-57ef-baa6-1fa23495670b',
-  'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdbc?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1800&q=80',
   'Screen porch',
   3
 );
@@ -646,7 +646,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   'edf3c8cf-86ce-5883-95a9-a2058e9d7379',
-  'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdbc?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1800&q=80',
   'Porch looking at oaks',
   1
 );
@@ -768,7 +768,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '1a19cd80-b9dc-5466-a8e6-396d2a1c4b91',
-  'https://images.unsplash.com/photo-1564013799907-f663824623d0?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1800&q=80',
   'Pool facing the marsh',
   1
 );
@@ -786,7 +786,7 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   '1a19cd80-b9dc-5466-a8e6-396d2a1c4b91',
-  'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdbc?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1800&q=80',
   'Covered porch',
   4
 );
@@ -890,13 +890,13 @@ insert into home_photos (home_id, src, alt, sort_order) values (
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   'c441384b-8e71-524f-86c3-719a52db7674',
-  'https://images.unsplash.com/photo-1564013799907-f663824623d0?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1800&q=80',
   'Pool in tropical light',
   1
 );
 insert into home_photos (home_id, src, alt, sort_order) values (
   'c441384b-8e71-524f-86c3-719a52db7674',
-  'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdbc?auto=format&fit=crop&w=1800&q=80',
+  'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1800&q=80',
   'Indoor outdoor living',
   2
 );

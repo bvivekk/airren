@@ -1,5 +1,5 @@
 begin;
-select plan(4);
+select plan(9);
 
 select is(
   (select total_paise from quote_stay(5030000, 3)),
@@ -88,6 +88,60 @@ select throws_ok(
   'P0001',
   'amount mismatch',
   'confirm_booking rejects a mismatched capture'
+);
+
+select throws_ok(
+  $$
+    select process_razorpay_event(
+      'event_retry',
+      'payment.captured',
+      '{"event":"payment.captured"}'::jsonb,
+      'order_missing',
+      'pay_retry',
+      17044500
+    );
+  $$,
+  'P0001',
+  'booking not found',
+  'failed processing returns an error'
+);
+
+select is(
+  (select count(*)::integer from razorpay_events where id = 'event_retry'),
+  0,
+  'failed processing rolls back the event claim for a retry'
+);
+
+select is(
+  process_razorpay_event(
+    'event_retry',
+    'payment.captured',
+    '{"event":"payment.captured"}'::jsonb,
+    'order_overlap_a',
+    'pay_retry',
+    17044500
+  ),
+  'processed',
+  'a retry can claim and process the rolled-back event'
+);
+
+select is(
+  process_razorpay_event(
+    'event_retry',
+    'payment.captured',
+    '{"event":"payment.captured"}'::jsonb,
+    'order_overlap_a',
+    'pay_retry',
+    17044500
+  ),
+  'duplicate',
+  'a committed event is deduplicated'
+);
+
+select is(
+  (select count(*)::integer from payments where razorpay_payment_id = 'pay_retry'),
+  1,
+  'duplicate delivery does not create another payment'
 );
 
 select * from finish();
