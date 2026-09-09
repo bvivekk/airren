@@ -13,6 +13,21 @@ import { quoteStay } from "@/lib/pricing";
 import { openRazorpayCheckout, type StayCheckout } from "@/lib/razorpay-checkout";
 import { useSupabaseClient } from "@/lib/supabase/browser";
 
+async function stayCheckoutInvokeError(error: { message?: string; context?: Response }): Promise<string> {
+  const context = error.context;
+  if (context) {
+    try {
+      const body = (await context.json()) as { error?: string };
+      if (typeof body.error === "string" && body.error.length > 0) {
+        return body.error;
+      }
+    } catch {
+      // The generic supabase-js message is the fallback.
+    }
+  }
+  return error.message || "Could not start checkout.";
+}
+
 export function BookingCard({
   home,
   checkIn,
@@ -55,7 +70,7 @@ export function BookingCard({
     });
     if (invokeError) {
       setPending(false);
-      setError(invokeError.message || "Could not start checkout.");
+      setError(await stayCheckoutInvokeError(invokeError));
       return;
     }
     const checkout = data as StayCheckout | { error?: string } | null;

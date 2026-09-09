@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
       .eq("id", homeId)
       .maybeSingle();
     if (homeError) {
+      console.error("checkout home", homeError.message);
       return jsonResponse({ error: homeError.message }, 400);
     }
     if (!home) {
@@ -67,6 +68,7 @@ Deno.serve(async (req) => {
       p_nights: nights,
     });
     if (quoteError) {
+      console.error("checkout quote", quoteError.message);
       return jsonResponse({ error: quoteError.message }, 400);
     }
     const quote = Array.isArray(quoteRows) ? quoteRows[0] : quoteRows;
@@ -90,7 +92,9 @@ Deno.serve(async (req) => {
     });
     const orderJson = (await orderResponse.json()) as { id?: string; error?: { description?: string } };
     if (!orderResponse.ok || !orderJson.id) {
-      return jsonResponse({ error: orderJson.error?.description ?? "could not create razorpay order" }, 502);
+      const razorpayError = orderJson.error?.description ?? "could not create razorpay order";
+      console.error("checkout razorpay", orderResponse.status, razorpayError);
+      return jsonResponse({ error: razorpayError }, 502);
     }
 
     const { data: booking, error: bookingError } = await supabase.rpc("create_pending_booking", {
@@ -101,6 +105,7 @@ Deno.serve(async (req) => {
       p_razorpay_order_id: orderJson.id,
     });
     if (bookingError) {
+      console.error("checkout booking", bookingError.message);
       const overlap = bookingError.message.toLowerCase().includes("exclusion") || bookingError.code === "23P01";
       return jsonResponse({ error: bookingError.message }, overlap ? 409 : 400);
     }
@@ -118,6 +123,7 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "checkout failed";
+    console.error("checkout failed", message);
     const status = message.includes("signed in") ? 401 : 400;
     return jsonResponse({ error: message }, status);
   }
