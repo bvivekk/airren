@@ -39,7 +39,7 @@ export default async function HomePage() {
             Find your happy place
           </h1>
           <p className="max-w-xl text-sm md:text-base">
-            Guest-first travel. Only the best homes. 24/7 concierge. No fees or markups.
+            Guest-first travel. Only the best homes. 24/7 concierge. Transparent stay quotes.
           </p>
         </div>
       </section>

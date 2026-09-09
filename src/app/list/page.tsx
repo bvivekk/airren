@@ -7,7 +7,7 @@ export const metadata = { title: "List on Airren" };
 export const dynamic = "force-dynamic";
 
 const STATS = [
-  { value: "$12M+", label: "demo bookings" },
+  { value: "₹100 Cr+", label: "demo bookings" },
   { value: "18,000+", label: "nights held" },
   { value: "90%+", label: "guest satisfaction" },
   { value: "16", label: "homes in this demo" },

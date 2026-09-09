@@ -1,6 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { upcomingYearMonths, windowFromFlexible } from "./dates.ts";
+import { addDaysIso, defaultStayWindow, nightsBetween, upcomingYearMonths, windowFromFlexible } from "./dates.ts";
+
+describe("nightsBetween", () => {
+  it("counts whole nights", () => {
+    assert.equal(nightsBetween("2026-10-01", "2026-10-04"), 3);
+  });
+});
+
+describe("defaultStayWindow", () => {
+  it("is three nights", () => {
+    const stay = defaultStayWindow();
+    assert.equal(nightsBetween(stay.checkIn, stay.checkOut), 3);
+    assert.equal(stay.checkOut, addDaysIso(stay.checkIn, 3));
+  });
+});
 
 describe("windowFromFlexible", () => {
   it("uses the first Friday of the first month for a weekend", () => {
