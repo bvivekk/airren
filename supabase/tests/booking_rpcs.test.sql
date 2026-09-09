@@ -1,5 +1,5 @@
 begin;
-select plan(9);
+select plan(10);
 
 select is(
   (select total_paise from quote_stay(5030000, 3)),
@@ -89,6 +89,38 @@ select throws_ok(
   'amount mismatch',
   'confirm_booking rejects a mismatched capture'
 );
+
+set role authenticated;
+select set_config('request.jwt.claims', '{"sub":"user_forge","role":"authenticated"}', true);
+
+select throws_ok(
+  $$
+    insert into bookings (
+      home_id, guest_id, check_in, check_out, guests, nights,
+      subtotal_paise, service_fee_paise, cleaning_fee_paise, total_paise,
+      razorpay_order_id, expires_at, status
+    ) values (
+      '11111111-1111-4111-8111-111111111111',
+      'user_forge',
+      '2026-12-01',
+      '2026-12-04',
+      2,
+      3,
+      1,
+      0,
+      0,
+      1,
+      'order_forge',
+      now() + interval '15 minutes',
+      'confirmed'
+    );
+  $$,
+  '42501',
+  null,
+  'authenticated guests cannot insert confirmed bookings'
+);
+
+reset role;
 
 select throws_ok(
   $$
