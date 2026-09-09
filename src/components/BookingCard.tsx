@@ -149,7 +149,9 @@ export function BookingCard({
         Reserve
       </button>
       {error ? <p className="mt-3 text-center text-xs text-muted">{error}</p> : null}
-      <p className="mt-3 text-center text-xs text-muted">You pay in INR with Razorpay. The stay confirms after payment is captured.</p>
+      <p className="mt-3 text-center text-xs text-muted">
+        Pay in INR. On a phone, Reserve can open Google Pay or PhonePe. The stay confirms after payment is captured.
+      </p>
       {quote.nights > 0 ? (
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">

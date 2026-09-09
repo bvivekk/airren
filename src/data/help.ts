@@ -45,6 +45,12 @@ export const HELP_ARTICLES: HelpArticle[] = [
     body: "A stay is confirmed only after Razorpay captures payment. Refunds follow the listing policy once a payment is captured.",
   },
   {
+    slug: "upi-apps",
+    collection: "payments",
+    title: "Google Pay and PhonePe",
+    body: "On a phone, Razorpay Checkout lists Google Pay and PhonePe first. Tapping one opens that app with the stay total filled in. On a computer, scan the UPI QR instead. Cards and other UPI still work.",
+  },
+  {
     slug: "search-tips",
     collection: "searching",
     title: "Find a home that fits",
@@ -54,7 +60,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     slug: "reserve",
     collection: "searching",
     title: "What Reserve does here",
-    body: "Reserve opens Razorpay Checkout in INR. The stay is confirmed only after payment.captured matches the quoted total.",
+    body: "Reserve opens Razorpay Checkout in INR. On a phone you can pay in Google Pay or PhonePe. The stay is confirmed only after payment.captured matches the quoted total.",
   },
   {
     slug: "sign-in",

@@ -6,6 +6,23 @@ export type StayCheckout = {
   keyId: string;
 };
 
+type UpiIntentInstrument = {
+  method: "upi";
+  flows: ["intent"];
+  apps: ["google_pay"] | ["phonepe"];
+};
+
+export type RazorpayDisplayConfig = {
+  display: {
+    blocks: {
+      gpay: { name: "Google Pay"; instruments: [UpiIntentInstrument] };
+      phonepe: { name: "PhonePe"; instruments: [UpiIntentInstrument] };
+    };
+    sequence: ["block.gpay", "block.phonepe", "upi", "card", "netbanking", "wallet"];
+    preferences: { show_default_blocks: true };
+  };
+};
+
 type RazorpayCheckout = {
   open: () => void;
 };
@@ -19,10 +36,30 @@ type RazorpayConstructor = new (options: {
   description: string;
   prefill: { email?: string; contact?: string; name?: string };
   readonly: { email?: boolean; contact?: boolean };
+  config: RazorpayDisplayConfig;
   handler: (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => void;
   modal: { ondismiss: () => void };
   theme: { color: string };
 }) => RazorpayCheckout;
+
+export function razorpayUpiAppDisplay(): RazorpayDisplayConfig {
+  return {
+    display: {
+      blocks: {
+        gpay: {
+          name: "Google Pay",
+          instruments: [{ method: "upi", flows: ["intent"], apps: ["google_pay"] }],
+        },
+        phonepe: {
+          name: "PhonePe",
+          instruments: [{ method: "upi", flows: ["intent"], apps: ["phonepe"] }],
+        },
+      },
+      sequence: ["block.gpay", "block.phonepe", "upi", "card", "netbanking", "wallet"],
+      preferences: { show_default_blocks: true },
+    },
+  };
+}
 
 function razorpayCtor(): RazorpayConstructor | undefined {
   const candidate = (window as unknown as { Razorpay?: RazorpayConstructor }).Razorpay;
@@ -73,6 +110,7 @@ export async function openRazorpayCheckout(options: {
       email: true,
       contact: true,
     },
+    config: razorpayUpiAppDisplay(),
     handler: () => {
       options.onPaid();
     },

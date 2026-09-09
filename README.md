@@ -1,6 +1,6 @@
 # Airren
 
-Luxury stays with a guest-first loop. Search, sign in, and pay for a stay in INR with Razorpay.
+Luxury stays with a guest-first loop. Search, sign in, and pay for a stay in INR with Razorpay, including Google Pay and PhonePe on a phone.
 
 ## Local
 

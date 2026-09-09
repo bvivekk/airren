@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 const REPLIES: { match: string; reply: string }[] = [
-  { match: "book", reply: "Pick dates on a home and hit Reserve. Razorpay takes the payment in INR." },
+  { match: "book", reply: "Pick dates on a home and hit Reserve. Pay in INR. On a phone you can finish in Google Pay or PhonePe." },
+  { match: "pay", reply: "Reserve opens Razorpay in INR. On a phone, tap Google Pay or PhonePe to open that app and confirm." },
   { match: "wifi", reply: "The house tablet has the Wi-Fi name and password on the home screen." },
   { match: "check", reply: "Arrival is 4pm. Checkout has no chores. Leave the keys in the door." },
   { match: "help", reply: "The help center is at /help. I can also take a note for concierge." },
