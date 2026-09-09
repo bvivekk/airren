@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Home } from "@/domain/home";
 import { badgeLabel } from "@/domain/home";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ListingSlideshow } from "@/components/ListingSlideshow";
 import { nightsBetween } from "@/lib/dates";
 import { formatInr, formatInrApprox } from "@/lib/money";
 import { quoteStay, scaledSavingsPaise } from "@/lib/pricing";
@@ -24,20 +24,14 @@ export function PropertyCard({
     where: query.where,
     checkIn: query.checkIn,
     checkOut: query.checkOut,
-    who: String(query.guests),
+    who: String(query.guests > 0 ? query.guests : 2),
   }).toString()}`;
 
   if (variant === "cinematic") {
     return (
       <Link href={href} data-home-card className="group relative block min-w-[280px] flex-[0_0_72%] md:flex-[0_0_32%]">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-3xl">
-          <Image
-            src={home.photos[0]?.src ?? ""}
-            alt={home.photos[0]?.alt ?? home.name}
-            fill
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 80vw, 32vw"
-          />
+        <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-pill">
+          <ListingSlideshow photos={home.photos} name={home.name} sizes="(max-width: 768px) 80vw, 32vw" />
           <CardOverlays home={home} />
         </div>
       </Link>
@@ -56,12 +50,10 @@ export function PropertyCard({
           : "group block"
       }
     >
-      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl">
-        <Image
-          src={home.photos[0]?.src ?? ""}
-          alt={home.photos[0]?.alt ?? home.name}
-          fill
-          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-pill">
+        <ListingSlideshow
+          photos={home.photos}
+          name={home.name}
           sizes={listing ? "(max-width: 1024px) 46vw, 20vw" : "(max-width: 768px) 100vw, 25vw"}
         />
         <CardOverlays home={home} />

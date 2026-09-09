@@ -36,10 +36,15 @@ export function Header() {
       <header
         data-slot="header"
         data-theme={overlay ? "dark" : "light"}
-        className={`fixed top-0 left-0 z-50 flex h-[72px] w-full items-center overflow-hidden border-b transition-[background-color,border-color] duration-200 ${
+        style={overlayPage ? { position: "fixed", top: 16 } : { position: "fixed", top: 0 }}
+        className={`fixed z-[100] overflow-visible flex h-[72px] items-center border transition-[background-color,border-color,box-shadow] duration-200 ${
+          overlayPage ? "top-4 right-4 left-4 w-auto rounded-2xl" : "top-0 left-0 w-full"
+        } ${
           overlay
-            ? "border-transparent bg-transparent text-white"
-            : "border-line bg-white text-foreground"
+            ? "border-transparent bg-transparent text-white shadow-none"
+            : overlayPage
+              ? "border-line bg-white text-foreground shadow-[0_8px_30px_rgba(0,0,0,0.08)]"
+              : "border-line bg-white text-foreground"
         }`}
       >
         <div className="page-container flex w-full items-center justify-between gap-4">
@@ -47,7 +52,7 @@ export function Header() {
             <LogoWordmark light={overlay} />
           </Link>
           {search ? (
-            <div className="hidden min-w-0 flex-1 justify-center lg:flex">
+            <div className="flex min-w-0 flex-1 justify-center overflow-visible">
               <Suspense fallback={<div className="h-12 w-full max-w-[720px] rounded-full bg-white" />}>
                 <SearchPill anchor />
               </Suspense>
@@ -63,7 +68,7 @@ export function Header() {
             ) : null}
             <Link
               href="/list"
-              className={`rounded-full border px-4 py-2 text-[13px] font-medium ${
+              className={`hidden rounded-full border px-4 py-2 text-[13px] font-medium sm:inline-flex ${
                 overlay ? "border-white/35 bg-transparent text-white" : "border-black/10 bg-white text-foreground"
               }`}
             >

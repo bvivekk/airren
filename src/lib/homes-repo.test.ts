@@ -47,4 +47,18 @@ describe("parseHome", () => {
   it("rejects an unknown badge", () => {
     assert.throws(() => parseHome({ ...row, badges: ["vip"] }), /unknown home badge/);
   });
+
+  it("rewrites retired Unsplash photo ids", () => {
+    const home = parseHome({
+      ...row,
+      home_photos: [
+        {
+          src: "https://images.unsplash.com/photo-1564013799907-f663824623d0?auto=format&fit=crop&w=1800&q=80",
+          alt: "Oceanfront house with a long pool",
+          sort_order: 0,
+        },
+      ],
+    });
+    assert.match(home.photos[0].src, /photo-1570129477492-45c003edd2be/);
+  });
 });

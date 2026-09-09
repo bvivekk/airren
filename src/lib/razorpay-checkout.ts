@@ -17,6 +17,8 @@ type RazorpayConstructor = new (options: {
   order_id: string;
   name: string;
   description: string;
+  prefill: { email?: string; contact?: string; name?: string };
+  readonly: { email?: boolean; contact?: boolean };
   handler: (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => void;
   modal: { ondismiss: () => void };
   theme: { color: string };
@@ -49,6 +51,8 @@ export async function loadRazorpayCheckout(): Promise<RazorpayConstructor> {
 export async function openRazorpayCheckout(options: {
   checkout: StayCheckout;
   description: string;
+  email?: string;
+  contact?: string;
   onPaid: () => void;
   onDismiss: () => void;
 }): Promise<void> {
@@ -60,6 +64,15 @@ export async function openRazorpayCheckout(options: {
     order_id: options.checkout.razorpayOrderId,
     name: "Airren",
     description: options.description,
+    prefill: {
+      name: "Guest",
+      email: options.email,
+      contact: options.contact,
+    },
+    readonly: {
+      email: true,
+      contact: true,
+    },
     handler: () => {
       options.onPaid();
     },

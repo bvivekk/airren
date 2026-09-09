@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Home } from "@/domain/home";
 import { useChrome } from "@/components/ChromeProvider";
+import { clerkSupabaseJwtTemplate } from "@/lib/clerk-supabase";
 import { nightsBetween } from "@/lib/dates";
 import { formatInr } from "@/lib/money";
 import { quoteStay } from "@/lib/pricing";
@@ -23,7 +24,7 @@ export function BookingCard({
   guests: number;
 }) {
   const router = useRouter();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const { session } = useSession();
   const { setSignInOpen } = useChrome();
   const supabase = useSupabaseClient();
@@ -41,7 +42,7 @@ export function BookingCard({
     }
     setPending(true);
     setError("");
-    const token = (await session?.getToken()) ?? null;
+    const token = (await session?.getToken({ template: clerkSupabaseJwtTemplate })) ?? null;
     const { data, error: invokeError } = await supabase.functions.invoke("create-stay-checkout", {
       body: {
         homeId: home.id,
@@ -64,9 +65,12 @@ export function BookingCard({
     }
     const stay = checkout as StayCheckout;
     try {
+      const phoneDigits = (user?.primaryPhoneNumber?.phoneNumber ?? "").replace(/\D/g, "");
       await openRazorpayCheckout({
         checkout: stay,
         description: home.name,
+        email: user?.primaryEmailAddress?.emailAddress,
+        contact: phoneDigits.length >= 10 ? `+91${phoneDigits.slice(-10)}` : "+919123456789",
         onPaid: () => {
           router.push(`/bookings/${stay.bookingId}`);
         },
@@ -82,39 +86,51 @@ export function BookingCard({
   };
 
   return (
-    <aside className="rounded-3xl border border-line p-5 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
-      <p className="text-2xl font-semibold">
-        {formatInr(home.nightlyRatePaise)}
-        <span className="text-sm font-normal text-muted"> / night</span>
-      </p>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <label className="rounded-2xl border border-line px-3 py-2 text-[11px] font-semibold">
-          Check in
-          <input
-            type="date"
-            value={inDate}
-            onChange={(event) => setInDate(event.target.value)}
-            className="mt-1 block w-full text-sm font-normal outline-none"
-          />
-        </label>
-        <label className="rounded-2xl border border-line px-3 py-2 text-[11px] font-semibold">
-          Check out
-          <input
-            type="date"
-            value={outDate}
-            onChange={(event) => setOutDate(event.target.value)}
-            className="mt-1 block w-full text-sm font-normal outline-none"
-          />
-        </label>
-        <label className="col-span-2 rounded-2xl border border-line px-3 py-2 text-[11px] font-semibold">
-          Guests
+    <aside className="rounded-2xl border border-line p-6 shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
+      {quote.nights > 0 ? (
+        <p className="text-[22px] leading-7">
+          <span className="font-semibold underline decoration-1 underline-offset-4">{formatInr(quote.totalPaise)}</span>
+          <span>
+            {" "}
+            for {quote.nights} {quote.nights === 1 ? "night" : "nights"}
+          </span>
+        </p>
+      ) : (
+        <p className="text-[22px] font-semibold">
+          {formatInr(home.nightlyRatePaise)}
+          <span className="text-sm font-normal text-muted"> / night</span>
+        </p>
+      )}
+      <div className="mt-4 overflow-hidden rounded-xl border border-foreground/80">
+        <div className="grid grid-cols-2">
+          <label className="border-r border-foreground/80 px-3 py-2.5 text-[10px] font-semibold tracking-wide">
+            CHECK-IN
+            <input
+              type="date"
+              value={inDate}
+              onChange={(event) => setInDate(event.target.value)}
+              className="mt-0.5 block w-full bg-transparent text-sm font-normal outline-none"
+            />
+          </label>
+          <label className="px-3 py-2.5 text-[10px] font-semibold tracking-wide">
+            CHECKOUT
+            <input
+              type="date"
+              value={outDate}
+              onChange={(event) => setOutDate(event.target.value)}
+              className="mt-0.5 block w-full bg-transparent text-sm font-normal outline-none"
+            />
+          </label>
+        </div>
+        <label className="block border-t border-foreground/80 px-3 py-2.5 text-[10px] font-semibold tracking-wide">
+          GUESTS
           <input
             type="number"
             min={1}
             max={home.guests}
             value={who}
             onChange={(event) => setWho(Number(event.target.value))}
-            className="mt-1 block w-full text-sm font-normal outline-none"
+            className="mt-0.5 block w-full bg-transparent text-sm font-normal outline-none"
           />
         </label>
       </div>

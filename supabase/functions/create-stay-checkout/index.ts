@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         amount: quote.total_paise,
         currency: "INR",
+        payment_capture: true,
         receipt: `stay_${homeId.replaceAll("-", "").slice(0, 12)}`,
         notes: { home_id: homeId, check_in: checkIn, check_out: checkOut },
       }),

@@ -33,11 +33,23 @@ export type Home = {
   description: string;
 };
 
+export const DATE_FLEX_DAYS = [0, 1, 2, 3, 7] as const;
+
+export type DateFlexDays = (typeof DATE_FLEX_DAYS)[number];
+
+export type FlexibleStayLength = "weekend" | "week";
+
+export type StayWhen =
+  | { kind: "dates"; flexibility: DateFlexDays }
+  | { kind: "flexible"; stay: FlexibleStayLength; months: string[] };
+
 export type StayQuery = {
   where: string;
   checkIn: string;
   checkOut: string;
   guests: number;
+  pets: number;
+  when: StayWhen;
 };
 
 export function badgeLabel(badge: HomeBadge): string {

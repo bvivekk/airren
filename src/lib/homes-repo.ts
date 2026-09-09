@@ -101,12 +101,31 @@ function parseBadge(value: string): HomeBadge {
   }
 }
 
+const DEAD_UNSPLASH_IDS: Record<string, string> = {
+  "photo-1564013799907-f663824623d0": "photo-1570129477492-45c003edd2be",
+  "photo-1600047509358-9dc75590d6a3": "photo-1568605114967-8130f3a36994",
+  "photo-1600047509807-ba8f99d2cdbc": "photo-1605276374104-dee2a0ed3cd6",
+  "photo-1600210491369-e753d80a33f0": "photo-1605146769289-440113cc3d00",
+  "photo-1600210492493-859ea5ce32b0": "photo-1501183638710-841dd1904471",
+  "photo-1600566752547-2f2313c76062": "photo-1600566753190-17f0baa2a6c3",
+  "photo-1600607687644-c7171b42498b": "photo-1613977257363-707ba9348227",
+};
+
+function rewritePhotoSrc(src: string): string {
+  for (const [deadId, liveId] of Object.entries(DEAD_UNSPLASH_IDS)) {
+    if (src.includes(deadId)) {
+      return src.replace(deadId, liveId);
+    }
+  }
+  return src;
+}
+
 function parsePhoto(value: unknown): HomePhotoRow {
   if (!isRecord(value)) {
     throw new Error("home photo must be an object");
   }
   return {
-    src: asString(value.src, "photo.src"),
+    src: rewritePhotoSrc(asString(value.src, "photo.src")),
     alt: asString(value.alt, "photo.alt"),
     sort_order: asNumber(value.sort_order, "photo.sort_order"),
   };
