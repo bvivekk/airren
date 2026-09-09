@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useSyncExternalStore } from "react";
@@ -25,7 +26,9 @@ export function Header() {
   const overlayPage = pathname === "/";
   const scrolled = useSyncExternalStore(subscribeScroll, scrollPastHero, () => false);
   const overlay = overlayPage && !scrolled;
-  const { setMenuOpen, name } = useChrome();
+  const { setMenuOpen } = useChrome();
+  const { user } = useUser();
+  const displayName = user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? user?.primaryPhoneNumber?.phoneNumber ?? null;
   const search = showSearch(pathname);
 
   return (
@@ -53,9 +56,9 @@ export function Header() {
             <div className="flex-1" />
           )}
           <div className="flex shrink-0 items-center gap-3">
-            {name ? (
+            {displayName ? (
               <span className={`hidden text-[13px] sm:inline ${overlay ? "text-white/80" : "text-muted"}`}>
-                {name}
+                {displayName}
               </span>
             ) : null}
             <Link

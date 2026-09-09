@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/dates.test.ts src/lib/help-search.test.ts src/lib/money.test.ts src/lib/pricing.test.ts src/lib/search.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/dates.test.ts src/lib/help-search.test.ts src/lib/money.test.ts src/lib/phone.test.ts src/lib/pricing.test.ts src/lib/search.test.ts"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.9.1",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"

@@ -1,18 +1,24 @@
 "use client";
 
+import { useClerk, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useChrome } from "@/components/ChromeProvider";
 
 const ITEMS = [
-  { href: null, label: "Sign in or sign up", action: "signin" as const },
   { href: "/download", label: "Download mobile app" },
   { href: "/list", label: "List on Airren" },
   { href: "/os", label: "Get AirrenOS" },
   { href: "/help", label: "Visit help center" },
 ];
 
+function guestLabel(user: NonNullable<ReturnType<typeof useUser>["user"]>): string {
+  return user.firstName ?? user.primaryEmailAddress?.emailAddress ?? user.primaryPhoneNumber?.phoneNumber ?? "Guest";
+}
+
 export function MenuDrawer() {
-  const { menuOpen, setMenuOpen, setSignInOpen, name } = useChrome();
+  const { menuOpen, setMenuOpen, setSignInOpen } = useChrome();
+  const { user, isSignedIn } = useUser();
+  const { signOut } = useClerk();
   if (!menuOpen) {
     return null;
   }
@@ -37,33 +43,42 @@ export function MenuDrawer() {
           </button>
         </div>
         <nav className="flex flex-col">
-          {ITEMS.map((item) => {
-            if (item.href === null) {
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  className="rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setSignInOpen(true);
-                  }}
-                >
-                  {name ? `Signed in as ${name}` : item.label}
-                </button>
-              );
-            }
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-lg px-3 py-2.5 text-[15px] text-foreground"
-                onClick={() => setMenuOpen(false)}
+          {isSignedIn && user ? (
+            <>
+              <p className="rounded-lg px-3 py-2.5 text-[15px] font-semibold">Signed in as {guestLabel(user)}</p>
+              <button
+                type="button"
+                className="rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold"
+                onClick={() => {
+                  setMenuOpen(false);
+                  void signOut();
+                }}
               >
-                {item.label}
-              </Link>
-            );
-          })}
+                Sign out
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold"
+              onClick={() => {
+                setMenuOpen(false);
+                setSignInOpen(true);
+              }}
+            >
+              Sign in or sign up
+            </button>
+          )}
+          {ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-lg px-3 py-2.5 text-[15px] text-foreground"
+              onClick={() => setMenuOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
       </div>
     </div>

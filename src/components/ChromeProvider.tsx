@@ -11,15 +11,12 @@ import {
 } from "react";
 
 const FAVORITES_KEY = "airren-favorites";
-const SESSION_KEY = "airren-session";
 
 type ChromeContextValue = {
   menuOpen: boolean;
   setMenuOpen: (open: boolean) => void;
   signInOpen: boolean;
   setSignInOpen: (open: boolean) => void;
-  name: string | null;
-  setName: (name: string | null) => void;
   favorites: ReadonlySet<string>;
   toggleFavorite: (slug: string) => void;
 };
@@ -37,10 +34,6 @@ function subscribe(onStoreChange: () => void) {
 
 function emit() {
   window.dispatchEvent(new Event("airren-store"));
-}
-
-function readName(): string | null {
-  return window.localStorage.getItem(SESSION_KEY);
 }
 
 function readFavorites(): string {
@@ -62,18 +55,8 @@ function parseFavorites(raw: string): Set<string> {
 export function ChromeProvider({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
-  const name = useSyncExternalStore(subscribe, readName, () => null);
   const favoritesRaw = useSyncExternalStore(subscribe, readFavorites, () => "[]");
   const favorites = useMemo(() => parseFavorites(favoritesRaw), [favoritesRaw]);
-
-  const setName = useCallback((next: string | null) => {
-    if (next) {
-      window.localStorage.setItem(SESSION_KEY, next);
-    } else {
-      window.localStorage.removeItem(SESSION_KEY);
-    }
-    emit();
-  }, []);
 
   const toggleFavorite = useCallback((slug: string) => {
     const next = parseFavorites(readFavorites());
@@ -92,12 +75,10 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
       setMenuOpen,
       signInOpen,
       setSignInOpen,
-      name,
-      setName,
       favorites,
       toggleFavorite,
     }),
-    [menuOpen, signInOpen, name, setName, favorites, toggleFavorite],
+    [menuOpen, signInOpen, favorites, toggleFavorite],
   );
 
   return <ChromeContext.Provider value={value}>{children}</ChromeContext.Provider>;
