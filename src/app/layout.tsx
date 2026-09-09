@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     default: "Airren",
     template: "%s · Airren",
   },
-  description: "Guest-first travel. Only the best homes. 24/7 concierge. No fees or markups.",
+  description: "Guest-first travel. Only the best homes. 24/7 concierge. Transparent stay quotes.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
