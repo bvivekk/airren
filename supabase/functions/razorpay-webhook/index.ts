@@ -1,9 +1,9 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { signaturesMatch } from "../_shared/hmac.ts";
+import { getRazorpayEventId } from "../_shared/razorpay-event.ts";
 
 type RazorpayEvent = {
-  id?: string;
   event?: string;
   payload?: {
     payment?: {
@@ -42,25 +42,13 @@ Deno.serve(async (req) => {
     return new Response("invalid json", { status: 400 });
   }
 
-  const eventId = event.id ?? "";
+  const eventId = getRazorpayEventId(req.headers);
   const eventType = event.event ?? "";
   if (!eventId || !eventType) {
     return new Response("missing event", { status: 400 });
   }
 
   const admin = createClient(supabaseUrl, serviceKey);
-  const { error: insertError } = await admin.from("razorpay_events").insert({
-    id: eventId,
-    event_type: eventType,
-    payload: event,
-  });
-  if (insertError) {
-    if (insertError.code === "23505") {
-      return new Response("ok", { status: 200 });
-    }
-    return new Response(insertError.message, { status: 500 });
-  }
-
   const payment = event.payload?.payment?.entity;
   const orderId = payment?.order_id ?? "";
   const paymentId = payment?.id ?? "";
@@ -70,30 +58,22 @@ Deno.serve(async (req) => {
     if (!orderId || !paymentId || typeof amount !== "number") {
       return new Response("missing payment fields", { status: 400 });
     }
-    const { error } = await admin.rpc("confirm_booking", {
-      p_order_id: orderId,
-      p_payment_id: paymentId,
-      p_amount_paise: amount,
-    });
-    if (error) {
-      if (error.message.includes("amount mismatch")) {
-        return new Response("ok", { status: 200 });
-      }
-      return new Response(error.message, { status: 400 });
-    }
-    return new Response("ok", { status: 200 });
-  }
-
-  if (eventType === "payment.failed") {
+  } else if (eventType === "payment.failed") {
     if (!orderId) {
       return new Response("missing order", { status: 400 });
     }
-    const { error } = await admin.rpc("fail_booking", { p_order_id: orderId });
-    if (error) {
-      return new Response(error.message, { status: 400 });
-    }
-    return new Response("ok", { status: 200 });
   }
 
+  const { error } = await admin.rpc("process_razorpay_event", {
+    p_event_id: eventId,
+    p_event_type: eventType,
+    p_payload: event,
+    p_order_id: orderId || null,
+    p_payment_id: paymentId || null,
+    p_amount_paise: amount ?? null,
+  });
+  if (error) {
+    return new Response(error.message, { status: 400 });
+  }
   return new Response("ok", { status: 200 });
 });

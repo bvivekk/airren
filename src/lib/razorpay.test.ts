@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createHmac } from "node:crypto";
+import { getRazorpayEventId } from "../../supabase/functions/_shared/razorpay-event.ts";
 import { verifyRazorpayCheckoutSignature, verifyRazorpayWebhookSignature } from "./razorpay.ts";
 
 describe("razorpay signatures", () => {
@@ -10,6 +11,14 @@ describe("razorpay signatures", () => {
     const signature = createHmac("sha256", secret).update(body).digest("hex");
     assert.equal(verifyRazorpayWebhookSignature(body, signature, secret), true);
     assert.equal(verifyRazorpayWebhookSignature(body, "0".repeat(signature.length), secret), false);
+  });
+
+  it("reads the unique webhook event ID from the Razorpay header", () => {
+    const event = { event: "payment.captured" };
+    const headers = new Headers({ "x-razorpay-event-id": "event_1" });
+
+    assert.equal("id" in event, false);
+    assert.equal(getRazorpayEventId(headers), "event_1");
   });
 
   it("accepts a matching checkout HMAC", () => {
