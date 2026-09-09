@@ -1,3 +1,4 @@
+import { ChatWidget } from "@/components/ChatWidget";
 import { ChromeProvider } from "@/components/ChromeProvider";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -19,6 +20,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <SignInModal />
       <div className="flex-1">{children}</div>
       <Footer />
+      <ChatWidget />
     </ChromeProvider>
   );
 }
