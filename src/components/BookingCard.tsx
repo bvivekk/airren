@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Home } from "@/domain/home";
 import { nightsBetween } from "@/lib/dates";
-import { formatUsd } from "@/lib/money";
+import { formatInr } from "@/lib/money";
 import { quoteStay } from "@/lib/pricing";
 import { bookingHref } from "@/lib/query";
 
@@ -24,12 +24,12 @@ export function BookingCard({
   const [outDate, setOutDate] = useState(checkOut);
   const [who, setWho] = useState(guests);
   const nights = nightsBetween(inDate, outDate);
-  const quote = useMemo(() => quoteStay(home.nightlyRateCents, nights), [home.nightlyRateCents, nights]);
+  const quote = useMemo(() => quoteStay(home.nightlyRatePaise, nights), [home.nightlyRatePaise, nights]);
 
   return (
     <aside className="rounded-3xl border border-line p-5 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
       <p className="text-2xl font-semibold">
-        {formatUsd(home.nightlyRateCents)}
+        {formatInr(home.nightlyRatePaise)}
         <span className="text-sm font-normal text-muted"> / night</span>
       </p>
       <div className="mt-4 grid grid-cols-2 gap-2">
@@ -85,21 +85,21 @@ export function BookingCard({
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <dt>
-              {formatUsd(home.nightlyRateCents)} × {quote.nights} nights
+              {formatInr(home.nightlyRatePaise)} × {quote.nights} nights
             </dt>
-            <dd>{formatUsd(quote.subtotalCents)}</dd>
+            <dd>{formatInr(quote.subtotalPaise)}</dd>
           </div>
           <div className="flex justify-between text-muted">
             <dt>Cleaning</dt>
-            <dd>{formatUsd(quote.cleaningFeeCents)}</dd>
+            <dd>{formatInr(quote.cleaningFeePaise)}</dd>
           </div>
           <div className="flex justify-between text-muted">
             <dt>Service</dt>
-            <dd>{formatUsd(quote.serviceFeeCents)}</dd>
+            <dd>{formatInr(quote.serviceFeePaise)}</dd>
           </div>
           <div className="flex justify-between border-t border-line pt-2 font-semibold">
             <dt>Total</dt>
-            <dd>{formatUsd(quote.totalCents)}</dd>
+            <dd>{formatInr(quote.totalPaise)}</dd>
           </div>
         </dl>
       ) : null}

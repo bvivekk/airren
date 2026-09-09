@@ -4,8 +4,8 @@ import type { Home } from "@/domain/home";
 import { badgeLabel } from "@/domain/home";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { nightsBetween } from "@/lib/dates";
-import { formatUsd, formatUsdApprox } from "@/lib/money";
-import { quoteStay, scaledSavingsCents } from "@/lib/pricing";
+import { formatInr, formatInrApprox } from "@/lib/money";
+import { quoteStay, scaledSavingsPaise } from "@/lib/pricing";
 import type { StayQuery } from "@/domain/home";
 
 export function PropertyCard({
@@ -18,8 +18,8 @@ export function PropertyCard({
   variant: "compact" | "cinematic" | "listing";
 }) {
   const nights = nightsBetween(query.checkIn, query.checkOut) || 3;
-  const quote = quoteStay(home.nightlyRateCents, nights);
-  const savings = scaledSavingsCents(home.savingsCents, nights);
+  const quote = quoteStay(home.nightlyRatePaise, nights);
+  const savings = scaledSavingsPaise(home.savingsPaise, nights);
   const href = `/homes/${home.slug}?${new URLSearchParams({
     where: query.where,
     checkIn: query.checkIn,
@@ -71,11 +71,11 @@ export function PropertyCard({
         <span className="shrink-0 text-[13px]">★ {home.rating.toFixed(1)}</span>
       </div>
       <p className="mt-0.5 text-[13px] text-muted">
-        {home.beds} beds · {formatUsd(quote.subtotalCents)} for {nights} nights
+        {home.beds} beds · {formatInr(quote.subtotalPaise)} for {nights} nights
       </p>
       {savings > 0 ? (
         <p className="mt-0.5 text-[13px] font-medium text-savings">
-          {formatUsdApprox(savings)} less than other sites
+          {formatInrApprox(savings)} less than other sites
         </p>
       ) : null}
     </Link>
