@@ -982,3 +982,125 @@ insert into home_categories (home_id, category_id) values ('b2d9465f-0262-5a8a-a
 insert into home_categories (home_id, category_id) values ('b2d9465f-0262-5a8a-a4b5-1a88b29405b6', 'forest');
 insert into home_categories (home_id, category_id) values ('b2d9465f-0262-5a8a-a4b5-1a88b29405b6', 'families');
 insert into home_categories (home_id, category_id) values ('b2d9465f-0262-5a8a-a4b5-1a88b29405b6', 'national-parks');
+insert into homes (
+  id, slug, name, type, city, region, country, beds, baths, guests,
+  nightly_rate_paise, rating, review_count, savings_paise, badges, description, sort_order
+) values (
+  '2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910',
+  'siesta-key-house',
+  'Siesta Key House',
+  'Home',
+  'Siesta Key',
+  'FL',
+  'USA',
+  4,
+  3,
+  8,
+  4820000,
+  4.8,
+  41,
+  990000,
+  ARRAY['luxury']::text[],
+  'A gulf-front house on Siesta Key with a pool, a long beach walk, and room for a dog who likes sand.',
+  16
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80',
+  'Gulf beach at Siesta Key',
+  0
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910',
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1800&q=80',
+  'Pool facing the gulf',
+  1
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910',
+  'https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1800&q=80',
+  'Open living room',
+  2
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910',
+  'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1800&q=80',
+  'Reading nook',
+  3
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910',
+  'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1800&q=80',
+  'Spa bath',
+  4
+);
+insert into home_amenities (home_id, amenity) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'Beach access');
+insert into home_amenities (home_id, amenity) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'Pool');
+insert into home_amenities (home_id, amenity) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'Pets allowed');
+insert into home_amenities (home_id, amenity) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'Fast Wi-Fi');
+insert into home_amenities (home_id, amenity) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'Grill');
+insert into home_categories (home_id, category_id) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'beach');
+insert into home_categories (home_id, category_id) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'pools');
+insert into home_categories (home_id, category_id) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'pet-friendly');
+insert into home_categories (home_id, category_id) values ('2c1f0a10-9b3e-4a71-8f2d-6e5c4b3a2910', 'summer');
+insert into homes (
+  id, slug, name, type, city, region, country, beds, baths, guests,
+  nightly_rate_paise, rating, review_count, savings_paise, badges, description, sort_order
+) values (
+  '3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21',
+  'asheville-ridge',
+  'Asheville Ridge',
+  'Home',
+  'Asheville',
+  'NC',
+  'USA',
+  3,
+  2,
+  6,
+  2740000,
+  4.9,
+  28,
+  620000,
+  ARRAY['new']::text[],
+  'A timber house in the Blue Ridge above Asheville. Trailheads close, downtown twenty minutes, dogs welcome on the porch.',
+  17
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21',
+  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80',
+  'Blue Ridge house',
+  0
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21',
+  'https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1800&q=80',
+  'Cabin living room',
+  1
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21',
+  'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1800&q=80',
+  'Kitchen',
+  2
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21',
+  'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1800&q=80',
+  'Reading nook',
+  3
+);
+insert into home_photos (home_id, src, alt, sort_order) values (
+  '3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1800&q=80',
+  'Forest path',
+  4
+);
+insert into home_amenities (home_id, amenity) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'Mountain views');
+insert into home_amenities (home_id, amenity) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'Pets allowed');
+insert into home_amenities (home_id, amenity) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'Hot tub');
+insert into home_amenities (home_id, amenity) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'Fast Wi-Fi');
+insert into home_amenities (home_id, amenity) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'Grill');
+insert into home_categories (home_id, category_id) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'mountain');
+insert into home_categories (home_id, category_id) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'forest');
+insert into home_categories (home_id, category_id) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'pet-friendly');
+insert into home_categories (home_id, category_id) values ('3d2e1b21-0c4f-4b82-9e3e-7f6d5c4b3a21', 'fall');

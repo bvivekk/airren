@@ -1,7 +1,8 @@
 import { PropertyCard } from "@/components/PropertyCard";
-import { filterHomes } from "@/lib/search";
+import { addDaysIso } from "@/lib/dates";
+import { filterHomes, queryFlexibility } from "@/lib/search";
 import { parseStayQuery, stayWhenLabel, stayWhoLabel } from "@/lib/query";
-import { listHomes } from "@/lib/homes-repo";
+import { listBusyStays, listHomes } from "@/lib/homes-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,10 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const query = parseStayQuery(params);
-  const homes = filterHomes(await listHomes(createServerClient()), query);
+  const flex = queryFlexibility(query);
+  const client = createServerClient();
+  const busy = await listBusyStays(client, addDaysIso(query.checkIn, -flex), addDaysIso(query.checkOut, flex));
+  const homes = filterHomes(await listHomes(client), query, busy);
 
   return (
     <main className="page-container py-10">

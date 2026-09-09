@@ -18,7 +18,7 @@ const sample: Home[] = [
     reviewCount: 1,
     savingsPaise: 830_000,
     badges: ["luxury"],
-    categoryIds: ["mountain"],
+    categoryIds: ["mountain", "pet-friendly"],
     photos: [{ src: "/x.jpg", alt: "x" }],
     amenities: [],
     description: "",
@@ -112,5 +112,50 @@ describe("filterHomes", () => {
       when: { kind: "dates", flexibility: 0 },
     });
     assert.equal(result.length, 0);
+  });
+
+  it("keeps only pet-friendly homes when pets are requested", () => {
+    const result = filterHomes(sample, {
+      where: "",
+      checkIn: "2026-10-01",
+      checkOut: "2026-10-04",
+      guests: 2,
+      pets: 1,
+      when: { kind: "dates", flexibility: 0 },
+    });
+    assert.equal(result.length, 1);
+    assert.equal(result[0]?.slug, "stowe");
+  });
+
+  it("hides a home whose exact dates are booked", () => {
+    const result = filterHomes(
+      sample,
+      {
+        where: "",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 0,
+        when: { kind: "dates", flexibility: 0 },
+      },
+      [{ homeId: "home-stowe", checkIn: "2026-10-01", checkOut: "2026-10-04" }],
+    );
+    assert.equal(result.map((home) => home.slug).join(","), "tiny");
+  });
+
+  it("keeps a booked home when date flexibility opens a free window", () => {
+    const result = filterHomes(
+      sample,
+      {
+        where: "stowe",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 0,
+        when: { kind: "dates", flexibility: 1 },
+      },
+      [{ homeId: "home-stowe", checkIn: "2026-10-01", checkOut: "2026-10-02" }],
+    );
+    assert.equal(result.length, 1);
   });
 });

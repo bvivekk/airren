@@ -10,7 +10,7 @@ const STATS = [
   { value: "₹100 Cr+", label: "demo bookings" },
   { value: "18,000+", label: "nights held" },
   { value: "90%+", label: "guest satisfaction" },
-  { value: "16", label: "homes in this demo" },
+  { value: "18", label: "homes in this demo" },
 ];
 
 export default async function ListPage() {
