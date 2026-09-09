@@ -5,6 +5,7 @@ import type { OAuthStrategy } from "@clerk/nextjs/types";
 import { useEffect, useState } from "react";
 import { useChrome } from "@/components/ChromeProvider";
 import { LogoMark } from "@/components/Logo";
+import { safeAppPath } from "@/lib/auth-redirect";
 import { toE164 } from "@/lib/phone";
 
 type Channel = "phone" | "email";
@@ -222,10 +223,11 @@ export function SignInModal() {
 
   async function signInWith(strategy: SocialStrategy) {
     setLocalError(null);
+    const returnPath = safeAppPath(`${window.location.pathname}${window.location.search}`);
     const { error } = await signIn.sso({
       strategy,
-      redirectUrl: "/",
-      redirectCallbackUrl: "/sso-callback",
+      redirectUrl: returnPath,
+      redirectCallbackUrl: `/sso-callback?redirect_url=${encodeURIComponent(returnPath)}`,
     });
     if (error) {
       setLocalError(error.message);

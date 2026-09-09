@@ -8,6 +8,7 @@ import { useChrome } from "@/components/ChromeProvider";
 import { clerkSupabaseJwtTemplate } from "@/lib/clerk-supabase";
 import { nightsBetween } from "@/lib/dates";
 import { formatInr } from "@/lib/money";
+import { guestCheckoutContact } from "@/lib/phone";
 import { quoteStay } from "@/lib/pricing";
 import { openRazorpayCheckout, type StayCheckout } from "@/lib/razorpay-checkout";
 import { useSupabaseClient } from "@/lib/supabase/browser";
@@ -65,12 +66,11 @@ export function BookingCard({
     }
     const stay = checkout as StayCheckout;
     try {
-      const phoneDigits = (user?.primaryPhoneNumber?.phoneNumber ?? "").replace(/\D/g, "");
       await openRazorpayCheckout({
         checkout: stay,
         description: home.name,
         email: user?.primaryEmailAddress?.emailAddress,
-        contact: phoneDigits.length >= 10 ? `+91${phoneDigits.slice(-10)}` : "+919123456789",
+        contact: guestCheckoutContact(user?.primaryPhoneNumber?.phoneNumber),
         onPaid: () => {
           router.push(`/bookings/${stay.bookingId}`);
         },

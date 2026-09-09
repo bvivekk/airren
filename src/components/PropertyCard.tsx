@@ -1,12 +1,11 @@
 import Link from "next/link";
-import type { Home } from "@/domain/home";
-import { badgeLabel } from "@/domain/home";
+import { badgeLabel, type Home, type StayQuery } from "@/domain/home";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ListingSlideshow } from "@/components/ListingSlideshow";
 import { nightsBetween } from "@/lib/dates";
 import { formatInr, formatInrApprox } from "@/lib/money";
 import { quoteStay, scaledSavingsPaise } from "@/lib/pricing";
-import type { StayQuery } from "@/domain/home";
+import { stayQuerySearchParams } from "@/lib/query";
 
 export function PropertyCard({
   home,
@@ -17,15 +16,10 @@ export function PropertyCard({
   query: StayQuery;
   variant: "compact" | "cinematic" | "listing";
 }) {
-  const nights = nightsBetween(query.checkIn, query.checkOut) || 3;
+  const nights = nightsBetween(query.checkIn, query.checkOut);
   const quote = quoteStay(home.nightlyRatePaise, nights);
   const savings = scaledSavingsPaise(home.savingsPaise, nights);
-  const href = `/homes/${home.slug}?${new URLSearchParams({
-    where: query.where,
-    checkIn: query.checkIn,
-    checkOut: query.checkOut,
-    who: String(query.guests > 0 ? query.guests : 2),
-  }).toString()}`;
+  const href = `/homes/${home.slug}?${stayQuerySearchParams(query).toString()}`;
 
   if (variant === "cinematic") {
     return (
@@ -63,9 +57,11 @@ export function PropertyCard({
         <span className="shrink-0 text-[13px]">★ {home.rating.toFixed(1)}</span>
       </div>
       <p className="mt-0.5 text-[13px] text-muted">
-        {home.beds} beds · {formatInr(quote.subtotalPaise)} for {nights} nights
+        {nights > 0
+          ? `${home.beds} beds · ${formatInr(quote.subtotalPaise)} for ${nights} ${nights === 1 ? "night" : "nights"}`
+          : `${home.beds} beds`}
       </p>
-      {savings > 0 ? (
+      {nights > 0 && savings > 0 ? (
         <p className="mt-0.5 text-[13px] font-medium text-savings">
           {formatInrApprox(savings)} less than other sites
         </p>

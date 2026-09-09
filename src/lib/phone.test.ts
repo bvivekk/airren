@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { toE164 } from "./phone.ts";
+import { guestCheckoutContact, toE164 } from "./phone.ts";
 
 describe("toE164", () => {
   it("prefixes a 10-digit India number", () => {
@@ -13,5 +13,16 @@ describe("toE164", () => {
 
   it("normalizes a 91-prefixed 12-digit number", () => {
     assert.equal(toE164("919876543210"), "+919876543210");
+  });
+});
+
+describe("guestCheckoutContact", () => {
+  it("omits contact when the guest has no phone", () => {
+    assert.equal(guestCheckoutContact(undefined), undefined);
+    assert.equal(guestCheckoutContact(""), undefined);
+  });
+
+  it("passes through a real number", () => {
+    assert.equal(guestCheckoutContact("+919876543210"), "+919876543210");
   });
 });

@@ -12,6 +12,14 @@ export function addDaysIso(iso: string, days: number): string {
   return isoDate(date);
 }
 
+export function isIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+  const parsed = new Date(`${value}T12:00:00`);
+  return Number.isFinite(parsed.getTime()) && isoDate(parsed) === value;
+}
+
 export function nightsBetween(checkIn: string, checkOut: string): number {
   const start = Date.parse(`${checkIn}T12:00:00`);
   const end = Date.parse(`${checkOut}T12:00:00`);
@@ -19,6 +27,16 @@ export function nightsBetween(checkIn: string, checkOut: string): number {
     return 0;
   }
   return Math.round((end - start) / 86_400_000);
+}
+
+export function repairCheckOut(checkIn: string, checkOut: string): string {
+  if (isIsoDate(checkOut) && checkOut > checkIn) {
+    return checkOut;
+  }
+  if (checkOut === "") {
+    return addDaysIso(checkIn, 3);
+  }
+  return addDaysIso(checkIn, 1);
 }
 
 export function defaultStayWindow(): { checkIn: string; checkOut: string } {
@@ -60,18 +78,64 @@ export function firstWeekdayOnOrAfter(year: number, month: number, weekday: numb
   return isoDate(date);
 }
 
+function futureWeekendInMonth(
+  year: number,
+  month: number,
+  fromIso: string,
+): { checkIn: string; checkOut: string } | null {
+  const monthKey = yearMonthKey(year, month);
+  let checkIn = firstWeekdayOnOrAfter(year, month, 5);
+  while (checkIn.startsWith(monthKey)) {
+    if (checkIn >= fromIso) {
+      return { checkIn, checkOut: addDaysIso(checkIn, 2) };
+    }
+    checkIn = addDaysIso(checkIn, 7);
+  }
+  return null;
+}
+
+function futureWeekInMonth(
+  year: number,
+  month: number,
+  fromIso: string,
+): { checkIn: string; checkOut: string } | null {
+  const monthKey = yearMonthKey(year, month);
+  let checkIn = `${monthKey}-01`;
+  while (checkIn.startsWith(monthKey)) {
+    if (checkIn >= fromIso) {
+      return { checkIn, checkOut: addDaysIso(checkIn, 7) };
+    }
+    checkIn = addDaysIso(checkIn, 7);
+  }
+  return null;
+}
+
 export function windowFromFlexible(
   stay: "weekend" | "week",
   months: string[],
+  fromIso: string = todayIso(),
 ): { checkIn: string; checkOut: string } {
-  const parsed = months.map(parseYearMonth).find((item) => item !== null);
-  if (!parsed) {
-    return defaultStayWindow();
+  const parsed = months
+    .map(parseYearMonth)
+    .filter((item): item is { year: number; month: number } => item !== null)
+    .sort((a, b) => a.year - b.year || a.month - b.month);
+  for (const month of parsed) {
+    let window: { checkIn: string; checkOut: string } | null;
+    switch (stay) {
+      case "weekend":
+        window = futureWeekendInMonth(month.year, month.month, fromIso);
+        break;
+      case "week":
+        window = futureWeekInMonth(month.year, month.month, fromIso);
+        break;
+      default: {
+        const _never: never = stay;
+        return _never;
+      }
+    }
+    if (window) {
+      return window;
+    }
   }
-  if (stay === "weekend") {
-    const checkIn = firstWeekdayOnOrAfter(parsed.year, parsed.month, 5);
-    return { checkIn, checkOut: addDaysIso(checkIn, 2) };
-  }
-  const checkIn = `${yearMonthKey(parsed.year, parsed.month)}-01`;
-  return { checkIn, checkOut: addDaysIso(checkIn, 7) };
+  return defaultStayWindow();
 }

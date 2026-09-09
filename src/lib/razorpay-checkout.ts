@@ -104,11 +104,11 @@ export async function openRazorpayCheckout(options: {
     prefill: {
       name: "Guest",
       email: options.email,
-      contact: options.contact,
+      ...(options.contact ? { contact: options.contact } : {}),
     },
     readonly: {
       email: true,
-      contact: true,
+      contact: Boolean(options.contact),
     },
     config: razorpayUpiAppDisplay(),
     handler: () => {

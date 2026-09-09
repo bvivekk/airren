@@ -15,3 +15,11 @@ export function toE164(raw: string, defaultCountry = "+91"): string {
   }
   return `+${digits}`;
 }
+
+export function guestCheckoutContact(phoneNumber: string | undefined | null): string | undefined {
+  if (!phoneNumber) {
+    return undefined;
+  }
+  const contact = toE164(phoneNumber);
+  return contact.length >= 8 ? contact : undefined;
+}

@@ -1,5 +1,5 @@
 import type { DateFlexDays, FlexibleStayLength, StayQuery, StayWhen } from "../domain/home";
-import { defaultStayWindow, parseYearMonth, windowFromFlexible } from "./dates.ts";
+import { defaultStayWindow, isIsoDate, parseYearMonth, repairCheckOut, windowFromFlexible } from "./dates.ts";
 
 type ParamMap = Record<string, string | string[] | undefined>;
 
@@ -76,32 +76,69 @@ function parseWhen(params: ParamMap): StayWhen {
   return { kind: "dates", flexibility: parseFlexDays(first(params.flex)) };
 }
 
+function parseCheckIn(raw: string, fallback: string): string {
+  return isIsoDate(raw) ? raw : fallback;
+}
+
 export function parseStayQuery(params: ParamMap): StayQuery {
   const defaults = defaultStayWindow();
   const when = parseWhen(params);
   const guests = parseGuests(first(params.who) || first(params.guests));
   const pets = parsePets(first(params.pets));
-  if (when.kind === "flexible") {
-    const window = windowFromFlexible(when.stay, when.months);
-    return {
-      where: first(params.where),
-      checkIn: first(params.checkIn) || window.checkIn,
-      checkOut: first(params.checkOut) || window.checkOut,
-      guests,
-      pets,
-      when,
-    };
+  switch (when.kind) {
+    case "flexible": {
+      const window = windowFromFlexible(when.stay, when.months);
+      return {
+        where: first(params.where),
+        checkIn: window.checkIn,
+        checkOut: window.checkOut,
+        guests,
+        pets,
+        when,
+      };
+    }
+    case "dates": {
+      const checkIn = parseCheckIn(first(params.checkIn) || first(params.when), defaults.checkIn);
+      return {
+        where: first(params.where),
+        checkIn,
+        checkOut: repairCheckOut(checkIn, first(params.checkOut)),
+        guests,
+        pets,
+        when,
+      };
+    }
+    default: {
+      const _never: never = when;
+      return _never;
+    }
   }
-  const checkIn = first(params.checkIn) || first(params.when) || defaults.checkIn;
-  const checkOut = first(params.checkOut) || defaults.checkOut;
-  return {
-    where: first(params.where),
-    checkIn,
-    checkOut: checkOut <= checkIn ? defaults.checkOut : checkOut,
-    guests,
-    pets,
-    when,
-  };
+}
+
+export function stayQuerySearchParams(query: StayQuery): URLSearchParams {
+  const params = new URLSearchParams({
+    where: query.where,
+    checkIn: query.checkIn,
+    checkOut: query.checkOut,
+    who: String(query.guests),
+    pets: String(query.pets),
+  });
+  switch (query.when.kind) {
+    case "flexible":
+      params.set("whenMode", "flexible");
+      params.set("stay", query.when.stay);
+      params.set("months", query.when.months.join(","));
+      break;
+    case "dates":
+      params.set("whenMode", "dates");
+      params.set("flex", String(query.when.flexibility));
+      break;
+    default: {
+      const _never: never = query.when;
+      return _never;
+    }
+  }
+  return params;
 }
 
 export function stayWhoLabel(query: StayQuery): string {
@@ -140,4 +177,39 @@ export function stayWhenLabel(query: StayQuery): string {
       return _never;
     }
   }
+}
+
+function joinList(parts: string[], lastSeparator: "and" | "or"): string {
+  if (parts.length === 0) {
+    return "";
+  }
+  if (parts.length === 1) {
+    return parts[0] ?? "";
+  }
+  if (parts.length === 2) {
+    return `${parts[0]} ${lastSeparator} ${parts[1]}`;
+  }
+  return `${parts.slice(0, -1).join(", ")}, ${lastSeparator} ${parts[parts.length - 1]}`;
+}
+
+export function emptySearchMessage(query: StayQuery): string {
+  const filters = ["dates"];
+  if (query.guests >= 1) {
+    filters.push("guests");
+  }
+  if (query.pets >= 1) {
+    filters.push("pets");
+  }
+  if (query.where.trim()) {
+    filters.push("place");
+  }
+  const suggestions: string[] = [];
+  if (query.guests >= 1) {
+    suggestions.push("fewer people");
+  }
+  if (query.pets >= 1) {
+    suggestions.push("skipping pets");
+  }
+  suggestions.push("another place");
+  return `No homes match those ${joinList(filters, "and")}. Try ${joinList(suggestions, "or")}.`;
 }

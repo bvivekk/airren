@@ -4,6 +4,7 @@ import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { LogoMark } from "@/components/Logo";
+import { safeAppPath } from "@/lib/auth-redirect";
 
 function goTo(
   router: ReturnType<typeof useRouter>,
@@ -31,6 +32,7 @@ export default function SsoCallbackPage() {
         return;
       }
       hasRun.current = true;
+      const returnPath = safeAppPath(new URLSearchParams(window.location.search).get("redirect_url"));
 
       const navigateHome = async ({
         session,
@@ -42,7 +44,7 @@ export default function SsoCallbackPage() {
         if (session?.currentTask) {
           return;
         }
-        goTo(router, decorateUrl, "/");
+        goTo(router, decorateUrl, returnPath);
       };
 
       async function finalizeSignIn() {
@@ -65,7 +67,7 @@ export default function SsoCallbackPage() {
           await finalizeSignIn();
           return;
         }
-        router.push("/");
+        router.push(returnPath);
         return;
       }
 
@@ -73,7 +75,7 @@ export default function SsoCallbackPage() {
         signIn.status === "needs_first_factor" &&
         !signIn.supportedFirstFactors?.every((factor) => factor.strategy === "enterprise_sso")
       ) {
-        router.push("/");
+        router.push(returnPath);
         return;
       }
 
@@ -83,7 +85,7 @@ export default function SsoCallbackPage() {
           await finalizeSignUp();
           return;
         }
-        router.push("/");
+        router.push(returnPath);
         return;
       }
 
@@ -93,7 +95,7 @@ export default function SsoCallbackPage() {
       }
 
       if (signIn.status === "needs_second_factor" || signIn.status === "needs_new_password") {
-        router.push("/");
+        router.push(returnPath);
         return;
       }
 
