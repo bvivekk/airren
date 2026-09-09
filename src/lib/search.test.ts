@@ -5,6 +5,7 @@ import { filterHomes } from "./search.ts";
 
 const sample: Home[] = [
   {
+    id: "home-stowe",
     slug: "stowe",
     name: "Sterling Canopy",
     type: "Home",
@@ -23,6 +24,7 @@ const sample: Home[] = [
     description: "",
   },
   {
+    id: "home-tiny",
     slug: "tiny",
     name: "Tiny Cabin",
     type: "Home",
@@ -49,6 +51,8 @@ describe("filterHomes", () => {
       checkIn: "2026-10-01",
       checkOut: "2026-10-04",
       guests: 2,
+      pets: 0,
+      when: { kind: "dates", flexibility: 0 },
     });
     assert.equal(result.length, 1);
     assert.equal(result[0]?.slug, "stowe");
@@ -60,8 +64,42 @@ describe("filterHomes", () => {
       checkIn: "2026-10-01",
       checkOut: "2026-10-04",
       guests: 12,
+      pets: 0,
+      when: { kind: "dates", flexibility: 0 },
     });
     assert.equal(result.length, 0);
+  });
+
+  it("matches a US state name against the region code", () => {
+    const result = filterHomes(
+      [
+        {
+          ...sample[0]!,
+          location: { city: "La Jolla", region: "CA", country: "USA" },
+        },
+      ],
+      {
+        where: "California",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 0,
+        when: { kind: "dates", flexibility: 0 },
+      },
+    );
+    assert.equal(result.length, 1);
+  });
+
+  it("skips the guest cap when guests are any", () => {
+    const result = filterHomes(sample, {
+      where: "",
+      checkIn: "2026-10-01",
+      checkOut: "2026-10-04",
+      guests: 0,
+      pets: 0,
+      when: { kind: "dates", flexibility: 0 },
+    });
+    assert.equal(result.length, 2);
   });
 
   it("returns none when where misses", () => {
@@ -70,6 +108,8 @@ describe("filterHomes", () => {
       checkIn: "2026-10-01",
       checkOut: "2026-10-04",
       guests: 2,
+      pets: 0,
+      when: { kind: "dates", flexibility: 0 },
     });
     assert.equal(result.length, 0);
   });

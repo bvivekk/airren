@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import { getCategory } from "@/data/categories";
-import { homesByCategory } from "@/data/homes";
 import { PropertyCard } from "@/components/PropertyCard";
 import { parseStayQuery } from "@/lib/query";
 import { CATEGORIES } from "@/data/categories";
+import { homesByCategory } from "@/lib/homes-repo";
+import { createServerClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return CATEGORIES.map((category) => ({ slug: category.slug }));
@@ -20,7 +23,7 @@ export default async function CategoryPage({
     notFound();
   }
   const query = parseStayQuery({});
-  const homes = homesByCategory(slug);
+  const homes = await homesByCategory(createServerClient(), slug);
 
   return (
     <main className="page-container py-12">

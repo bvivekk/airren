@@ -1,19 +1,20 @@
 import Image from "next/image";
-import { Suspense } from "react";
-import { HOMES, homesByCategory } from "@/data/homes";
 import { PropertyCarousel } from "@/components/PropertyCarousel";
-import { SearchPill } from "@/components/SearchPill";
 import { parseStayQuery } from "@/lib/query";
+import { listHomes } from "@/lib/homes-repo";
+import { createServerClient } from "@/lib/supabase/server";
 
-const HERO =
-  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=2400&q=80";
+const HERO = "/images/homepage-hero.jpg";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
   const query = parseStayQuery({});
-  const loved = HOMES.slice(0, 8);
-  const fall = homesByCategory("fall");
-  const lake = homesByCategory("lake");
-  const desert = homesByCategory("desert");
+  const homes = await listHomes(createServerClient());
+  const loved = homes.slice(0, 8);
+  const fall = homesByCategoryFrom(homes, "fall");
+  const lake = homesByCategoryFrom(homes, "lake");
+  const desert = homesByCategoryFrom(homes, "desert");
 
   return (
     <>
@@ -26,7 +27,7 @@ export default function HomePage() {
           alt=""
           fill
           priority
-          className="object-cover object-[50%_70%] lg:object-[50%_62%]"
+          className="object-cover object-[50%_42%] lg:object-[50%_38%]"
           sizes="(min-width: 46.5rem) 100vw, 220vw"
         />
         <div className="absolute inset-0 bg-black/50" />
@@ -40,11 +41,6 @@ export default function HomePage() {
           <p className="max-w-xl text-sm md:text-base">
             Guest-first travel. Only the best homes. 24/7 concierge. Transparent stay quotes.
           </p>
-          <div className="mt-2 w-full max-w-[720px] lg:hidden">
-            <Suspense>
-              <SearchPill />
-            </Suspense>
-          </div>
         </div>
       </section>
       <main id="landing" className="relative">
@@ -57,4 +53,8 @@ export default function HomePage() {
       </main>
     </>
   );
+}
+
+function homesByCategoryFrom(homes: Awaited<ReturnType<typeof listHomes>>, categoryId: string) {
+  return homes.filter((home) => home.categoryIds.includes(categoryId));
 }

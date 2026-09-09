@@ -56,3 +56,35 @@ body {
     padding-inline: 3rem;
   }
 }
+
+.listing-mosaic {
+  display: grid;
+  gap: 0.5rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(220px, 42vw) repeat(2, minmax(6.5rem, 1fr));
+}
+
+.listing-mosaic > :first-child {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 40rem) {
+  .listing-mosaic {
+    height: 420px;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .listing-mosaic > :first-child {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+}
+
+@media (min-width: 64rem) {
+  .listing-mosaic {
+    height: 460px;
+  }
+}
