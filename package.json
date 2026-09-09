@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/dates.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/dates.test.ts src/lib/help-search.test.ts src/lib/pricing.test.ts src/lib/search.test.ts"
   },
   "dependencies": {
     "next": "16.3.4",
