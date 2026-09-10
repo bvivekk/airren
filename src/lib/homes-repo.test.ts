@@ -48,6 +48,29 @@ describe("parseHome", () => {
     assert.throws(() => parseHome({ ...row, badges: ["vip"] }), /unknown home badge/);
   });
 
+  it("rewrites storage photo src to a public object URL", () => {
+    const previous = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:54321";
+    try {
+      const home = parseHome({
+        ...row,
+        home_photos: [
+          {
+            src: "storage:listing-photos/user_1/listing-id/photo.jpg",
+            alt: "Deck",
+            sort_order: 0,
+          },
+        ],
+      });
+      assert.equal(
+        home.photos[0].src,
+        "http://127.0.0.1:54321/storage/v1/object/public/listing-photos/user_1/listing-id/photo.jpg",
+      );
+    } finally {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = previous;
+    }
+  });
+
   it("rewrites retired Unsplash photo ids", () => {
     const home = parseHome({
       ...row,

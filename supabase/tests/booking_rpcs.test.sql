@@ -26,7 +26,7 @@ insert into homes (
   1,
   0,
   '{}',
-  'Test home'
+  'A booking RPC fixture home with a description long enough for a published row.'
 );
 
 select lives_ok(

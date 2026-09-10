@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
       .from("homes")
       .select("id, nightly_rate_paise, guests")
       .eq("id", homeId)
+      .eq("status", "published")
       .maybeSingle();
     if (homeError) {
       console.error("checkout home", homeError.message);

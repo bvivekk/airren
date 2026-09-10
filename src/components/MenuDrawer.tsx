@@ -53,6 +53,13 @@ export function MenuDrawer() {
               >
                 My trips
               </Link>
+              <Link
+                href="/host/listings"
+                className="rounded-lg px-3 py-2.5 text-[15px] text-foreground"
+                onClick={() => setMenuOpen(false)}
+              >
+                Your listings
+              </Link>
               <button
                 type="button"
                 className="rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold"

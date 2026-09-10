@@ -1,5 +1,6 @@
 import type { Home, HomeBadge } from "@/domain/home";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { resolveStoragePhotoSrc, STORAGE_SRC_PREFIX } from "./photo-src.ts";
 
 const HOME_SELECT = `
   id,
@@ -112,6 +113,9 @@ const DEAD_UNSPLASH_IDS: Record<string, string> = {
 };
 
 function rewritePhotoSrc(src: string): string {
+  if (src.startsWith(STORAGE_SRC_PREFIX)) {
+    return resolveStoragePhotoSrc(src);
+  }
   for (const [deadId, liveId] of Object.entries(DEAD_UNSPLASH_IDS)) {
     if (src.includes(deadId)) {
       return src.replace(deadId, liveId);
@@ -179,7 +183,7 @@ export function parseHome(row: unknown): Home {
 }
 
 async function loadHomeRows(client: SupabaseClient, slug?: string): Promise<Home[]> {
-  let query = client.from("homes").select(HOME_SELECT).order("sort_order");
+  let query = client.from("homes").select(HOME_SELECT).eq("status", "published").order("sort_order");
   if (slug) {
     query = query.eq("slug", slug);
   }

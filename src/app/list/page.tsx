@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ListApplyForm } from "@/components/ListApplyForm";
+import { StartListingButton } from "@/components/StartListingButton";
 import { getHomeBySlug, listHomes } from "@/lib/homes-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -31,7 +31,7 @@ export default async function ListPage() {
           List your vacation home on Airren to reach high-intent travelers, attract better guests, and stand out in a curated marketplace.
         </p>
         <div className="mt-8">
-          <ListApplyForm />
+          <StartListingButton />
         </div>
         {home ? (
           <div className="mx-auto mt-14 overflow-hidden rounded-[28px] bg-white shadow-[0_30px_80px_rgba(0,0,0,0.12)]">
@@ -67,9 +67,9 @@ export default async function ListPage() {
         <section className="mt-20 text-left">
           <h2 className="text-center text-3xl font-semibold">Get started in three steps</h2>
           <ol className="mx-auto mt-8 max-w-xl space-y-4 text-sm">
-            <li>1. Apply with an OTA or site link. We import the listing.</li>
-            <li>2. We review the home. If it fits, you confirm rates.</li>
-            <li>3. Launch. Guests book. You keep operating the house.</li>
+            <li>1. Add your home.</li>
+            <li>2. Add photos and a price.</li>
+            <li>3. Publish. Guests can book.</li>
           </ol>
         </section>
       </div>
