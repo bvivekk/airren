@@ -26,6 +26,8 @@ function fallbackTitle(source: OccupancySource): string {
       return "Booked on Airren";
     case "host":
       return "Blocked";
+    case "external":
+      return "Booked on Airbnb";
     default: {
       const _never: never = source;
       return _never;

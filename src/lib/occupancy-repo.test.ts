@@ -38,6 +38,24 @@ describe("parseListingCalendar", () => {
     assert.equal(entries[1]?.removable, true);
   });
 
+  it("accepts an external channel stay as non-host occupancy", () => {
+    const imported = {
+      ...payload,
+      entries: [
+        {
+          ...payload.entries[0],
+          source: "external",
+          label: "Airbnb · HMA123",
+          removable: false,
+        },
+      ],
+    };
+    const entries = parseListingCalendar(imported);
+    assert.equal(entries[0]?.source, "external");
+    assert.equal(entries[0]?.removable, false);
+    assert.equal(entries[0]?.label, "Airbnb · HMA123");
+  });
+
   it("rejects an unknown source", () => {
     const forged = {
       ...payload,

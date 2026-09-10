@@ -45,7 +45,7 @@ export function stayNights(value: Stay): number {
   return Math.round((Date.parse(`${value.to}T00:00:00Z`) - Date.parse(`${value.from}T00:00:00Z`)) / DAY_MS);
 }
 
-export const OCCUPANCY_SOURCES = ["airren", "host"] as const;
+export const OCCUPANCY_SOURCES = ["airren", "host", "external"] as const;
 export type OccupancySource = (typeof OCCUPANCY_SOURCES)[number];
 
 export type CalendarEntry = {
