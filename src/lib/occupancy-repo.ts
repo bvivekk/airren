@@ -48,6 +48,7 @@ function parseSource(value: unknown): OccupancySource {
   switch (value) {
     case "airren":
     case "host":
+    case "external":
       return value;
     default:
       throw new Error(`unknown occupancy source: ${String(value)}`);
