@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     });
     if (bookingError) {
       console.error("checkout booking", bookingError.message);
-      const overlap = bookingError.message.toLowerCase().includes("exclusion") || bookingError.code === "23P01";
+      const overlap = bookingError.code === "23P01";
       return jsonResponse({ error: bookingError.message }, overlap ? 409 : 400);
     }
     const bookingRow = Array.isArray(booking) ? booking[0] : booking;
