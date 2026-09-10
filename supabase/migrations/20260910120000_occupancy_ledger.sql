@@ -26,8 +26,6 @@ create unique index occupancy_external_ref_key
 alter table occupancy enable row level security;
 revoke all on table occupancy from anon, authenticated;
 
--- on delete restrict so freeing nights must go through a function that also
--- transitions the booking; a bare DELETE on a live Airren stay fails.
 alter table bookings
   add column occupancy_id uuid unique references occupancy (id) on delete restrict;
 
@@ -371,7 +369,6 @@ $$;
 
 drop function busy_stays(date, date);
 
--- No status filter: every row in the ledger occupies. daterange never crosses the API.
 create or replace function busy_stays(p_from date, p_to date, p_home_id uuid default null)
 returns table (home_id uuid, check_in date, check_out date)
 language sql

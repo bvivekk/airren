@@ -33,9 +33,7 @@ function fallbackTitle(source: OccupancySource): string {
   }
 }
 
-function fieldClassName() {
-  return "mt-2 w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm outline-none";
-}
+const FIELD_CLASS = "mt-2 w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm outline-none";
 
 export function HostListingCalendar({
   listingId,
@@ -115,7 +113,7 @@ export function HostListingCalendar({
               type="date"
               value={checkIn}
               onChange={(event) => setCheckIn(event.target.value)}
-              className={fieldClassName()}
+              className={FIELD_CLASS}
             />
           </label>
           <label className="block text-sm font-medium">
@@ -124,7 +122,7 @@ export function HostListingCalendar({
               type="date"
               value={checkOut}
               onChange={(event) => setCheckOut(event.target.value)}
-              className={fieldClassName()}
+              className={FIELD_CLASS}
             />
           </label>
           <label className="block text-sm font-medium">
@@ -133,7 +131,7 @@ export function HostListingCalendar({
               value={label}
               onChange={(event) => setLabel(event.target.value)}
               placeholder="Booked on Airbnb"
-              className={fieldClassName()}
+              className={FIELD_CLASS}
             />
           </label>
           <div className="sm:col-span-3">

@@ -4,13 +4,8 @@ declare const stayBrand: unique symbol;
 export type HomeId = string;
 export type OccupancyId = string;
 
-/** A calendar day, `YYYY-MM-DD`, validated. */
 export type IsoDate = string & { readonly [isoDateBrand]: true };
 
-/**
- * A half-open range of nights, `[from, to)`. `to` is the checkout day and is never
- * occupied, so same-day turnover is legal. Unconstructable when `to <= from`.
- */
 export type Stay = { readonly from: IsoDate; readonly to: IsoDate; readonly [stayBrand]: true };
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -61,28 +56,19 @@ export type CalendarEntry = {
   readonly removable: boolean;
 };
 
-/**
- * Availability questions a date picker asks. Owns the half-open convention, same-day
- * turnover, and the sold-night representation. Answers occupancy only; "not in the
- * past" stays with the caller.
- */
 export interface Calendar {
   canStartOn(day: IsoDate): boolean;
   canEndOn(start: IsoDate, day: IsoDate): boolean;
-  /** Latest legal checkout for a stay beginning on `start`; clamped to the loaded window. */
   latestCheckOut(start: IsoDate): IsoDate;
-  /** First night in `value` that is already sold, or null when the whole stay is open. */
   firstSoldNight(value: Stay): IsoDate | null;
 }
 
-/** Serializable calendar input; the shape that crosses the server-to-client boundary. */
 export type CalendarData = {
   readonly window: Stay;
   readonly stays: readonly Stay[];
 };
 
 export interface CalendarSet {
-  /** A home with no rows in the window gets an all-open calendar, not undefined. */
   for(homeId: HomeId): Calendar;
   dataFor(homeId: HomeId): CalendarData;
 }

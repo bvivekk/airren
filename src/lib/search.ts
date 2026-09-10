@@ -30,7 +30,6 @@ export function queryFlexibility(query: StayQuery): number {
   return query.when.kind === "dates" ? query.when.flexibility : 0;
 }
 
-/** The widest range any flexibility shift can reach, sized for one busy_stays fetch. */
 export function searchWindow(query: StayQuery): Stay | null {
   const requested = stay(query.checkIn, query.checkOut);
   if (!requested) {
@@ -40,7 +39,6 @@ export function searchWindow(query: StayQuery): Stay | null {
   return stayOf(addNights(requested.from, -flex), stayNights(requested) + 2 * flex);
 }
 
-/** The window that is actually open for this home under the query's flexibility, or null. */
 export function openWindowFor(homeId: HomeId, calendars: CalendarSet, query: StayQuery): Stay | null {
   const requested = stay(query.checkIn, query.checkOut);
   if (!requested) {

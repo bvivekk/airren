@@ -92,18 +92,18 @@ export function BookingCard({
       setError((checkout && "error" in checkout && checkout.error) || "Could not start checkout.");
       return;
     }
-    const stay = checkout as StayCheckout;
+    const checkoutStay = checkout as StayCheckout;
     try {
       await openRazorpayCheckout({
-        checkout: stay,
+        checkout: checkoutStay,
         description: home.name,
         email: user?.primaryEmailAddress?.emailAddress,
         contact: guestCheckoutContact(user?.primaryPhoneNumber?.phoneNumber),
         onPaid: () => {
-          router.push(`/bookings/${stay.bookingId}`);
+          router.push(`/bookings/${checkoutStay.bookingId}`);
         },
         onDismiss: () => {
-          router.push(`/bookings/${stay.bookingId}`);
+          router.push(`/bookings/${checkoutStay.bookingId}`);
         },
       });
     } catch (checkoutError) {
