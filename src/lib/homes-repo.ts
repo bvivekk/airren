@@ -198,28 +198,6 @@ export async function listHomes(client: SupabaseClient): Promise<Home[]> {
   return loadHomeRows(client);
 }
 
-export type BusyStayRow = {
-  homeId: string;
-  checkIn: string;
-  checkOut: string;
-};
-
-export async function listBusyStays(
-  client: SupabaseClient,
-  fromIso: string,
-  toIso: string,
-): Promise<BusyStayRow[]> {
-  const { data, error } = await client.rpc("busy_stays", { p_from: fromIso, p_to: toIso });
-  if (error) {
-    throw new Error(error.message);
-  }
-  return (data ?? []).map((row: { home_id: string; check_in: string; check_out: string }) => ({
-    homeId: row.home_id,
-    checkIn: row.check_in,
-    checkOut: row.check_out,
-  }));
-}
-
 export async function getHomeBySlug(client: SupabaseClient, slug: string): Promise<Home | undefined> {
   const homes = await loadHomeRows(client, slug);
   return homes[0];

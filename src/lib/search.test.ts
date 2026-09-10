@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { Home } from "../domain/home.ts";
+import { calendarsFrom, stay, type CalendarSet, type Stay } from "../domain/occupancy.ts";
 import { filterHomes } from "./search.ts";
 
 const sample: Home[] = [
@@ -44,29 +45,52 @@ const sample: Home[] = [
   },
 ];
 
+function mustStay(from: string, to: string): Stay {
+  const value = stay(from, to);
+  assert.ok(value, `stay(${from}, ${to}) must construct`);
+  return value;
+}
+
+function busyCalendars(ranges: { homeId: string; from: string; to: string }[] = []): CalendarSet {
+  return calendarsFrom(
+    ranges.map((range) => ({ homeId: range.homeId, stay: mustStay(range.from, range.to) })),
+    mustStay("2026-09-20", "2026-11-01"),
+  );
+}
+
 describe("filterHomes", () => {
-  it("matches city", () => {
-    const result = filterHomes(sample, {
-      where: "stowe",
-      checkIn: "2026-10-01",
-      checkOut: "2026-10-04",
-      guests: 2,
-      pets: 0,
-      when: { kind: "dates", flexibility: 0 },
-    });
+  it("matches city and links the requested dates when open", () => {
+    const result = filterHomes(
+      sample,
+      {
+        where: "stowe",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 0,
+        when: { kind: "dates", flexibility: 0 },
+      },
+      busyCalendars(),
+    );
     assert.equal(result.length, 1);
-    assert.equal(result[0]?.slug, "stowe");
+    assert.equal(result[0]?.home.slug, "stowe");
+    assert.equal(result[0]?.stay.from, "2026-10-01");
+    assert.equal(result[0]?.stay.to, "2026-10-04");
   });
 
   it("drops homes under the guest cap", () => {
-    const result = filterHomes(sample, {
-      where: "",
-      checkIn: "2026-10-01",
-      checkOut: "2026-10-04",
-      guests: 12,
-      pets: 0,
-      when: { kind: "dates", flexibility: 0 },
-    });
+    const result = filterHomes(
+      sample,
+      {
+        where: "",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 12,
+        pets: 0,
+        when: { kind: "dates", flexibility: 0 },
+      },
+      busyCalendars(),
+    );
     assert.equal(result.length, 0);
   });
 
@@ -86,45 +110,58 @@ describe("filterHomes", () => {
         pets: 0,
         when: { kind: "dates", flexibility: 0 },
       },
+      busyCalendars(),
     );
     assert.equal(result.length, 1);
   });
 
   it("skips the guest cap when guests are any", () => {
-    const result = filterHomes(sample, {
-      where: "",
-      checkIn: "2026-10-01",
-      checkOut: "2026-10-04",
-      guests: 0,
-      pets: 0,
-      when: { kind: "dates", flexibility: 0 },
-    });
+    const result = filterHomes(
+      sample,
+      {
+        where: "",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 0,
+        pets: 0,
+        when: { kind: "dates", flexibility: 0 },
+      },
+      busyCalendars(),
+    );
     assert.equal(result.length, 2);
   });
 
   it("returns none when where misses", () => {
-    const result = filterHomes(sample, {
-      where: "paris",
-      checkIn: "2026-10-01",
-      checkOut: "2026-10-04",
-      guests: 2,
-      pets: 0,
-      when: { kind: "dates", flexibility: 0 },
-    });
+    const result = filterHomes(
+      sample,
+      {
+        where: "paris",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 0,
+        when: { kind: "dates", flexibility: 0 },
+      },
+      busyCalendars(),
+    );
     assert.equal(result.length, 0);
   });
 
   it("keeps only pet-friendly homes when pets are requested", () => {
-    const result = filterHomes(sample, {
-      where: "",
-      checkIn: "2026-10-01",
-      checkOut: "2026-10-04",
-      guests: 2,
-      pets: 1,
-      when: { kind: "dates", flexibility: 0 },
-    });
+    const result = filterHomes(
+      sample,
+      {
+        where: "",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 1,
+        when: { kind: "dates", flexibility: 0 },
+      },
+      busyCalendars(),
+    );
     assert.equal(result.length, 1);
-    assert.equal(result[0]?.slug, "stowe");
+    assert.equal(result[0]?.home.slug, "stowe");
   });
 
   it("hides a home whose exact dates are booked", () => {
@@ -138,12 +175,12 @@ describe("filterHomes", () => {
         pets: 0,
         when: { kind: "dates", flexibility: 0 },
       },
-      [{ homeId: "home-stowe", checkIn: "2026-10-01", checkOut: "2026-10-04" }],
+      busyCalendars([{ homeId: "home-stowe", from: "2026-10-01", to: "2026-10-04" }]),
     );
-    assert.equal(result.map((home) => home.slug).join(","), "tiny");
+    assert.equal(result.map((item) => item.home.slug).join(","), "tiny");
   });
 
-  it("keeps a booked home when date flexibility opens a free window", () => {
+  it("links the shifted window when flexibility is what kept the home", () => {
     const result = filterHomes(
       sample,
       {
@@ -154,8 +191,26 @@ describe("filterHomes", () => {
         pets: 0,
         when: { kind: "dates", flexibility: 1 },
       },
-      [{ homeId: "home-stowe", checkIn: "2026-10-01", checkOut: "2026-10-02" }],
+      busyCalendars([{ homeId: "home-stowe", from: "2026-10-01", to: "2026-10-02" }]),
     );
     assert.equal(result.length, 1);
+    assert.equal(result[0]?.stay.from, "2026-10-02");
+    assert.equal(result[0]?.stay.to, "2026-10-05");
+  });
+
+  it("drops the home when no shift inside the flexibility is open", () => {
+    const result = filterHomes(
+      sample,
+      {
+        where: "stowe",
+        checkIn: "2026-10-01",
+        checkOut: "2026-10-04",
+        guests: 2,
+        pets: 0,
+        when: { kind: "dates", flexibility: 1 },
+      },
+      busyCalendars([{ homeId: "home-stowe", from: "2026-09-29", to: "2026-10-06" }]),
+    );
+    assert.equal(result.length, 0);
   });
 });
