@@ -6,6 +6,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { parseStayQuery } from "@/lib/query";
 import { badgeLabel, type Home } from "@/domain/home";
 import { getHomeBySlug } from "@/lib/homes-repo";
+import { bookingWindow, loadCalendars } from "@/lib/occupancy-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -28,10 +29,12 @@ export default async function HomeDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
-  const home = await getHomeBySlug(createServerClient(), slug);
+  const client = createServerClient();
+  const home = await getHomeBySlug(client, slug);
   if (!home) {
     notFound();
   }
+  const calendars = await loadCalendars(client, bookingWindow(), home.id);
   const query = parseStayQuery(await searchParams);
   const guestFavourite = home.rating >= 4.8 && home.reviewCount >= 10;
 
@@ -98,7 +101,13 @@ export default async function HomeDetailPage({
           </ul>
         </div>
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <BookingCard home={home} checkIn={query.checkIn} checkOut={query.checkOut} guests={query.guests} />
+          <BookingCard
+            home={home}
+            calendar={calendars.dataFor(home.id)}
+            checkIn={query.checkIn}
+            checkOut={query.checkOut}
+            guests={query.guests}
+          />
         </div>
       </div>
     </main>

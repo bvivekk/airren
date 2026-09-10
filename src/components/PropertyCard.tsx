@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { badgeLabel, type Home, type StayQuery } from "@/domain/home";
+import type { Stay } from "@/domain/occupancy";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ListingSlideshow } from "@/components/ListingSlideshow";
 import { nightsBetween } from "@/lib/dates";
@@ -10,16 +11,20 @@ import { stayQuerySearchParams } from "@/lib/query";
 export function PropertyCard({
   home,
   query,
+  stay,
   variant,
 }: {
   home: Home;
   query: StayQuery;
+  stay?: Stay;
   variant: "compact" | "cinematic" | "listing";
 }) {
-  const nights = nightsBetween(query.checkIn, query.checkOut);
+  const checkIn = stay?.from ?? query.checkIn;
+  const checkOut = stay?.to ?? query.checkOut;
+  const nights = nightsBetween(checkIn, checkOut);
   const quote = quoteStay(home.nightlyRatePaise, nights);
   const savings = scaledSavingsPaise(home.savingsPaise, nights);
-  const href = `/homes/${home.slug}?${stayQuerySearchParams(query).toString()}`;
+  const href = `/homes/${home.slug}?${stayQuerySearchParams({ ...query, checkIn, checkOut }).toString()}`;
 
   if (variant === "cinematic") {
     return (

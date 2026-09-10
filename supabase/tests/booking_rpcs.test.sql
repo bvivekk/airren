@@ -29,57 +29,32 @@ insert into homes (
   'A booking RPC fixture home with a description long enough for a published row.'
 );
 
+set role authenticated;
+select set_config('request.jwt.claims', '{"sub":"user_a","role":"authenticated"}', true);
+
 select lives_ok(
   $$
-    insert into bookings (
-      home_id, guest_id, check_in, check_out, guests, nights,
-      subtotal_paise, service_fee_paise, cleaning_fee_paise, total_paise,
-      razorpay_order_id, expires_at, status
-    ) values (
-      '11111111-1111-4111-8111-111111111111',
-      'user_a',
-      '2026-10-01',
-      '2026-10-04',
-      2,
-      3,
-      15090000,
-      754500,
-      1200000,
-      17044500,
-      'order_overlap_a',
-      now() + interval '15 minutes',
-      'pending_payment'
+    select create_pending_booking(
+      '11111111-1111-4111-8111-111111111111', '2026-10-01', '2026-10-04', 2, 'order_overlap_a'
     );
   $$,
-  'first pending lock inserts'
+  'first pending hold takes the nights'
 );
+
+select set_config('request.jwt.claims', '{"sub":"user_b","role":"authenticated"}', true);
 
 select throws_ok(
   $$
-    insert into bookings (
-      home_id, guest_id, check_in, check_out, guests, nights,
-      subtotal_paise, service_fee_paise, cleaning_fee_paise, total_paise,
-      razorpay_order_id, expires_at, status
-    ) values (
-      '11111111-1111-4111-8111-111111111111',
-      'user_b',
-      '2026-10-02',
-      '2026-10-05',
-      2,
-      3,
-      15090000,
-      754500,
-      1200000,
-      17044500,
-      'order_overlap_b',
-      now() + interval '15 minutes',
-      'pending_payment'
+    select create_pending_booking(
+      '11111111-1111-4111-8111-111111111111', '2026-10-02', '2026-10-05', 2, 'order_overlap_b'
     );
   $$,
   '23P01',
   null,
   'overlapping pending bookings are rejected'
 );
+
+reset role;
 
 select throws_ok(
   $$

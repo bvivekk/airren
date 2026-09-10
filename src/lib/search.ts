@@ -1,13 +1,15 @@
 import type { Home, StayQuery } from "../domain/home";
-import { addDaysIso, nightsBetween } from "./dates.ts";
+import {
+  addNights,
+  stay,
+  stayNights,
+  stayOf,
+  type CalendarSet,
+  type HomeId,
+  type Stay,
+} from "../domain/occupancy.ts";
 
 export const SUGGESTED_DESTINATIONS = ["California", "Florida", "North Carolina"] as const;
-
-export type BusyStay = {
-  homeId: string;
-  checkIn: string;
-  checkOut: string;
-};
 
 const REGION_NAMES: Record<string, string> = {
   AZ: "arizona",
@@ -22,51 +24,63 @@ const REGION_NAMES: Record<string, string> = {
   VT: "vermont",
 };
 
-export function dateRangesOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
-  return aStart < bEnd && bStart < aEnd;
-}
+export type SearchResult = { home: Home; stay: Stay };
 
 export function queryFlexibility(query: StayQuery): number {
   return query.when.kind === "dates" ? query.when.flexibility : 0;
 }
 
-export function homeIsOpen(homeId: string, busy: BusyStay[], query: StayQuery): boolean {
-  const nights = nightsBetween(query.checkIn, query.checkOut);
-  if (nights <= 0) {
-    return true;
+export function searchWindow(query: StayQuery): Stay | null {
+  const requested = stay(query.checkIn, query.checkOut);
+  if (!requested) {
+    return null;
   }
   const flex = queryFlexibility(query);
-  for (let offset = -flex; offset <= flex; offset += 1) {
-    const start = addDaysIso(query.checkIn, offset);
-    const end = addDaysIso(start, nights);
-    const blocked = busy.some(
-      (stay) => stay.homeId === homeId && dateRangesOverlap(start, end, stay.checkIn, stay.checkOut),
-    );
-    if (!blocked) {
-      return true;
-    }
-  }
-  return false;
+  return stayOf(addNights(requested.from, -flex), stayNights(requested) + 2 * flex);
 }
 
-export function filterHomes(homes: Home[], query: StayQuery, busy: BusyStay[] = []): Home[] {
+export function openWindowFor(homeId: HomeId, calendars: CalendarSet, query: StayQuery): Stay | null {
+  const requested = stay(query.checkIn, query.checkOut);
+  if (!requested) {
+    return null;
+  }
+  const calendar = calendars.for(homeId);
+  const nights = stayNights(requested);
+  const flex = queryFlexibility(query);
+  for (let distance = 0; distance <= flex; distance += 1) {
+    for (const offset of distance === 0 ? [0] : [-distance, distance]) {
+      const candidate = stayOf(addNights(requested.from, offset), nights);
+      if (calendar.firstSoldNight(candidate) === null) {
+        return candidate;
+      }
+    }
+  }
+  return null;
+}
+
+export function filterHomes(homes: Home[], query: StayQuery, calendars: CalendarSet): SearchResult[] {
   const where = query.where.trim().toLowerCase();
-  return homes.filter((home) => {
+  const results: SearchResult[] = [];
+  for (const home of homes) {
     if (query.guests >= 1 && query.guests > home.guests) {
-      return false;
+      continue;
     }
     if (query.pets >= 1 && !home.categoryIds.includes("pet-friendly")) {
-      return false;
+      continue;
     }
-    if (!homeIsOpen(home.id, busy, query)) {
-      return false;
+    if (where) {
+      const regionName = REGION_NAMES[home.location.region] ?? "";
+      const haystack =
+        `${home.name} ${home.location.city} ${home.location.region} ${regionName} ${home.location.country}`.toLowerCase();
+      if (!haystack.includes(where)) {
+        continue;
+      }
     }
-    if (!where) {
-      return true;
+    const open = openWindowFor(home.id, calendars, query);
+    if (!open) {
+      continue;
     }
-    const regionName = REGION_NAMES[home.location.region] ?? "";
-    const haystack =
-      `${home.name} ${home.location.city} ${home.location.region} ${regionName} ${home.location.country}`.toLowerCase();
-    return haystack.includes(where);
-  });
+    results.push({ home, stay: open });
+  }
+  return results;
 }
