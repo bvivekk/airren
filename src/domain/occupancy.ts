@@ -128,7 +128,6 @@ export function calendarFrom(data: CalendarData): Calendar {
   };
 }
 
-/** Pure: groups ranges by home for the window. No I/O, no Supabase types. */
 export function calendarsFrom(ranges: Iterable<{ homeId: HomeId; stay: Stay }>, window: Stay): CalendarSet {
   const byHome = new Map<HomeId, Stay[]>();
   for (const range of ranges) {
