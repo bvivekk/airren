@@ -4,9 +4,10 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useSyncExternalStore } from "react";
+import { useChrome } from "@/components/ChromeProvider";
 import { LogoWordmark } from "@/components/Logo";
 import { SearchPill } from "@/components/SearchPill";
-import { useChrome } from "@/components/ChromeProvider";
+import { StartListingButton } from "@/components/StartListingButton";
 
 function showSearch(pathname: string): boolean {
   return pathname === "/" || pathname.startsWith("/search") || pathname.startsWith("/homes") || pathname.startsWith("/c");
@@ -66,14 +67,23 @@ export function Header() {
                 {displayName}
               </span>
             ) : null}
-            <Link
-              href="/list"
-              className={`hidden rounded-full border px-4 py-2 text-[13px] font-medium sm:inline-flex ${
-                overlay ? "border-white/35 bg-transparent text-white" : "border-black/10 bg-white text-foreground"
-              }`}
-            >
-              List on Airren
-            </Link>
+            {pathname === "/list" ? (
+              <StartListingButton
+                compact
+                className={`hidden rounded-full border px-4 py-2 text-[13px] font-medium sm:inline-flex ${
+                  overlay ? "border-white/35 bg-transparent text-white" : "border-black/10 bg-white text-foreground"
+                }`}
+              />
+            ) : (
+              <Link
+                href="/list"
+                className={`hidden rounded-full border px-4 py-2 text-[13px] font-medium sm:inline-flex ${
+                  overlay ? "border-white/35 bg-transparent text-white" : "border-black/10 bg-white text-foreground"
+                }`}
+              >
+                List on Airren
+              </Link>
+            )}
             <button
               type="button"
               aria-label="Open menu"
