@@ -4,9 +4,10 @@ import { useSession, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Home } from "@/domain/home";
+import { calendarFrom, isoDate, stay, type CalendarData, type IsoDate } from "@/domain/occupancy";
 import { useChrome } from "@/components/ChromeProvider";
 import { clerkSupabaseJwtTemplate } from "@/lib/clerk-supabase";
-import { nightsBetween } from "@/lib/dates";
+import { addDaysIso, nightsBetween, todayIso } from "@/lib/dates";
 import { formatInr } from "@/lib/money";
 import { guestCheckoutContact } from "@/lib/phone";
 import { quoteStay } from "@/lib/pricing";
@@ -28,13 +29,19 @@ async function stayCheckoutInvokeError(error: { message?: string; context?: Resp
   return error.message || "Could not start checkout.";
 }
 
+function formatDay(day: IsoDate): string {
+  return new Date(`${day}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 export function BookingCard({
   home,
+  calendar: calendarData,
   checkIn,
   checkOut,
   guests,
 }: {
   home: Home;
+  calendar: CalendarData;
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -51,6 +58,12 @@ export function BookingCard({
   const [pending, setPending] = useState(false);
   const nights = nightsBetween(inDate, outDate);
   const quote = useMemo(() => quoteStay(home.nightlyRatePaise, nights), [home.nightlyRatePaise, nights]);
+  const calendar = useMemo(() => calendarFrom(calendarData), [calendarData]);
+  const soldNight = useMemo(() => {
+    const requested = stay(inDate, outDate);
+    return requested ? calendar.firstSoldNight(requested) : null;
+  }, [calendar, inDate, outDate]);
+  const startDay = isoDate(inDate);
 
   const startCheckout = async () => {
     if (quote.nights <= 0 || who < 1 || who > home.guests) {
@@ -123,6 +136,7 @@ export function BookingCard({
             <input
               type="date"
               value={inDate}
+              min={todayIso()}
               onChange={(event) => setInDate(event.target.value)}
               className="mt-0.5 block w-full bg-transparent text-sm font-normal outline-none"
             />
@@ -132,6 +146,8 @@ export function BookingCard({
             <input
               type="date"
               value={outDate}
+              min={addDaysIso(inDate, 1)}
+              max={startDay ? calendar.latestCheckOut(startDay) : undefined}
               onChange={(event) => setOutDate(event.target.value)}
               className="mt-0.5 block w-full bg-transparent text-sm font-normal outline-none"
             />
@@ -152,7 +168,7 @@ export function BookingCard({
       <button
         type="button"
         className="mt-4 w-full rounded-full bg-foreground py-3 text-sm font-medium text-white disabled:opacity-40"
-        disabled={quote.nights === 0 || who < 1 || who > home.guests || pending}
+        disabled={soldNight !== null || quote.nights === 0 || who < 1 || who > home.guests || pending}
         onClick={() => {
           if (!isSignedIn) {
             setSignInOpen(true);
@@ -163,6 +179,11 @@ export function BookingCard({
       >
         Reserve
       </button>
+      {soldNight ? (
+        <p className="mt-3 text-center text-xs text-muted">
+          Not available from {formatDay(soldNight)}. Pick different dates.
+        </p>
+      ) : null}
       {error ? <p className="mt-3 text-center text-xs text-muted">{error}</p> : null}
       <p className="mt-3 text-center text-xs text-muted">
         Pay in INR. On a phone, Reserve can open Google Pay or PhonePe. The stay confirms after payment is captured.
