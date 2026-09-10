@@ -54,7 +54,9 @@ export function PropertyCard({
       </div>
       <div className="mt-3 flex items-start justify-between gap-3">
         <h3 className="text-[15px] font-semibold tracking-tight">{home.name}</h3>
-        <span className="shrink-0 text-[13px]">★ {home.rating.toFixed(1)}</span>
+        <span className="shrink-0 text-[13px]">
+          {home.reviewCount > 0 ? `★ ${home.rating.toFixed(1)}` : "New"}
+        </span>
       </div>
       <p className="mt-0.5 text-[13px] text-muted">
         {nights > 0
