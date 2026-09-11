@@ -14,6 +14,14 @@ type RazorpayEvent = {
         status?: string;
       };
     };
+    refund?: {
+      entity?: {
+        id?: string;
+        payment_id?: string;
+        amount?: number;
+        status?: string;
+      };
+    };
   };
 };
 
@@ -50,9 +58,10 @@ Deno.serve(async (req) => {
 
   const admin = createClient(supabaseUrl, serviceKey);
   const payment = event.payload?.payment?.entity;
+  const refund = event.payload?.refund?.entity;
   const orderId = payment?.order_id ?? "";
-  const paymentId = payment?.id ?? "";
-  const amount = payment?.amount;
+  const paymentId = payment?.id ?? refund?.payment_id ?? "";
+  const amount = payment?.amount ?? refund?.amount;
 
   if (eventType === "payment.captured") {
     if (!orderId || !paymentId || typeof amount !== "number") {
@@ -61,6 +70,10 @@ Deno.serve(async (req) => {
   } else if (eventType === "payment.failed") {
     if (!orderId) {
       return new Response("missing order", { status: 400 });
+    }
+  } else if (eventType === "refund.processed" || eventType === "refund.failed") {
+    if (!refund?.id) {
+      return new Response("missing refund", { status: 400 });
     }
   }
 

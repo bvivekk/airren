@@ -460,3 +460,15 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/razorpayx-webhook/deno.json"
 entrypoint = "./functions/razorpayx-webhook/index.ts"
+
+[functions.cancel-stay]
+enabled = true
+verify_jwt = false
+import_map = "./functions/cancel-stay/deno.json"
+entrypoint = "./functions/cancel-stay/index.ts"
+
+[functions.run-refunds]
+enabled = true
+verify_jwt = false
+import_map = "./functions/run-refunds/deno.json"
+entrypoint = "./functions/run-refunds/index.ts"
