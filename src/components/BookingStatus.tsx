@@ -33,6 +33,12 @@ function statusCopy(booking: Booking): { kicker: string; title: string; detail: 
         title: `The hold expired for ${booking.homeName}`,
         detail: "Start a new Reserve if you still want the home.",
       };
+    case "canceled":
+      return {
+        kicker: "Stay canceled",
+        title: `${booking.homeName} is no longer reserved`,
+        detail: "Those dates are free again.",
+      };
     default: {
       const _never: never = booking.status;
       return _never;

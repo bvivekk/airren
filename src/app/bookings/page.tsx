@@ -18,6 +18,8 @@ function statusLabel(status: Booking["status"]): string {
       return "Failed";
     case "expired":
       return "Expired";
+    case "canceled":
+      return "Canceled";
     default: {
       const _never: never = status;
       return _never;

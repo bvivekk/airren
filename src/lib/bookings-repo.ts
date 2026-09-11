@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus } from "@/domain/booking";
+import type { Booking, BookingStatus, CancelActor } from "@/domain/booking";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 type HomeEmbed = {
@@ -19,6 +19,8 @@ export type BookingRow = {
   razorpay_order_id: string | null;
   expires_at: string | null;
   status: string;
+  canceled_at: string | null;
+  canceled_by: string | null;
   created_at: string;
   homes: HomeEmbed | HomeEmbed[] | null;
 };
@@ -36,6 +38,8 @@ const BOOKING_SELECT = `
   razorpay_order_id,
   expires_at,
   status,
+  canceled_at,
+  canceled_by,
   created_at,
   homes ( name, slug )
 `;
@@ -77,10 +81,21 @@ function parseStatus(value: string): BookingStatus {
     case "confirmed":
     case "failed":
     case "expired":
+    case "canceled":
       return value;
     default:
       throw new Error(`unknown booking status: ${value}`);
   }
+}
+
+function parseCanceledBy(value: unknown): CancelActor | null {
+  if (value === null) {
+    return null;
+  }
+  if (value === "guest" || value === "host") {
+    return value;
+  }
+  throw new Error("booking row canceled_by must be guest or host");
 }
 
 function parseHomeEmbed(value: unknown): HomeEmbed {
@@ -115,6 +130,8 @@ export function parseBooking(row: unknown): Booking {
     razorpayOrderId: asNullableString(row.razorpay_order_id, "razorpay_order_id"),
     expiresAt: asNullableString(row.expires_at, "expires_at"),
     status,
+    canceledAt: asNullableString(row.canceled_at, "canceled_at"),
+    canceledBy: parseCanceledBy(row.canceled_by ?? null),
     createdAt: asString(row.created_at, "created_at"),
   };
 }
