@@ -74,9 +74,7 @@ async function cancelStayInvokeError(error: { message?: string; context?: Respon
       if (typeof body.error === "string" && body.error.length > 0) {
         return body.error;
       }
-    } catch {
-      // The generic supabase-js message is the fallback.
-    }
+    } catch {}
   }
   return error.message || "Could not cancel this stay.";
 }
