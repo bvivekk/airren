@@ -15,8 +15,6 @@ export type BookingRow = {
   guests: number;
   nights: number;
   subtotal_paise: number;
-  service_fee_paise: number;
-  cleaning_fee_paise: number;
   total_paise: number;
   razorpay_order_id: string | null;
   expires_at: string | null;
@@ -34,8 +32,6 @@ const BOOKING_SELECT = `
   guests,
   nights,
   subtotal_paise,
-  service_fee_paise,
-  cleaning_fee_paise,
   total_paise,
   razorpay_order_id,
   expires_at,
@@ -115,8 +111,6 @@ export function parseBooking(row: unknown): Booking {
     guests: asNumber(row.guests, "guests"),
     nights: asNumber(row.nights, "nights"),
     subtotalPaise: asNumber(row.subtotal_paise, "subtotal_paise"),
-    serviceFeePaise: asNumber(row.service_fee_paise, "service_fee_paise"),
-    cleaningFeePaise: asNumber(row.cleaning_fee_paise, "cleaning_fee_paise"),
     totalPaise: asNumber(row.total_paise, "total_paise"),
     razorpayOrderId: asNullableString(row.razorpay_order_id, "razorpay_order_id"),
     expiresAt: asNullableString(row.expires_at, "expires_at"),

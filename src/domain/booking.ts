@@ -13,8 +13,6 @@ export type Booking = {
   guests: number;
   nights: number;
   subtotalPaise: number;
-  serviceFeePaise: number;
-  cleaningFeePaise: number;
   totalPaise: number;
   razorpayOrderId: string | null;
   expiresAt: string | null;

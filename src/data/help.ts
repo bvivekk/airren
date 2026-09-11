@@ -36,7 +36,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     slug: "how-pricing-works",
     collection: "payments",
     title: "How a stay is priced",
-    body: "Nightly rate times nights, plus a cleaning fee and a 5% service fee. Airren does not add a guest markup on top of the listed rate.",
+    body: "Nightly rate times nights. That is the guest total. Airren keeps a 10% host commission and pays the rest to the host after check-in.",
   },
   {
     slug: "refunds",

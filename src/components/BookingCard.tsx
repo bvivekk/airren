@@ -175,14 +175,6 @@ export function BookingCard({
             </dt>
             <dd>{formatInr(quote.subtotalPaise)}</dd>
           </div>
-          <div className="flex justify-between text-muted">
-            <dt>Cleaning</dt>
-            <dd>{formatInr(quote.cleaningFeePaise)}</dd>
-          </div>
-          <div className="flex justify-between text-muted">
-            <dt>Service</dt>
-            <dd>{formatInr(quote.serviceFeePaise)}</dd>
-          </div>
           <div className="flex justify-between border-t border-line pt-2 font-semibold">
             <dt>Total</dt>
             <dd>{formatInr(quote.totalPaise)}</dd>
