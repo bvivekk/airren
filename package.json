@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/auth-redirect.test.ts src/lib/bookings-repo.test.ts src/lib/dates.test.ts src/lib/help-search.test.ts src/lib/homes-repo.test.ts src/lib/host-earnings-repo.test.ts src/lib/host-listings-repo.test.ts src/lib/money.test.ts src/lib/phone.test.ts src/lib/photo-src.test.ts src/lib/pricing.test.ts src/lib/query.test.ts src/lib/razorpay-checkout.test.ts src/lib/razorpay.test.ts src/lib/search.test.ts"
+    "test": "node --experimental-strip-types --test src/domain/refund.test.ts src/lib/auth-redirect.test.ts src/lib/bookings-repo.test.ts src/lib/dates.test.ts src/lib/help-search.test.ts src/lib/homes-repo.test.ts src/lib/host-earnings-repo.test.ts src/lib/host-listings-repo.test.ts src/lib/money.test.ts src/lib/phone.test.ts src/lib/photo-src.test.ts src/lib/pricing.test.ts src/lib/query.test.ts src/lib/razorpay-checkout.test.ts src/lib/razorpay.test.ts src/lib/search.test.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.1",
