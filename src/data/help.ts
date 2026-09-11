@@ -42,7 +42,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     slug: "refunds",
     collection: "payments",
     title: "Refunds after a captured payment",
-    body: "A stay is confirmed only after Razorpay captures payment. Refunds follow the listing policy once a payment is captured.",
+    body: "A stay is confirmed only after Razorpay captures payment. Listings default to Flexible: a full refund if you cancel at least 24 hours before 3:00 pm IST on check-in day, otherwise none. A listing can override to Strict: half back if you cancel at least 14 days before that same instant, otherwise none. If the host cancels, you get a full refund.",
   },
   {
     slug: "upi-apps",
