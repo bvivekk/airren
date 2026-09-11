@@ -12,7 +12,6 @@ export type RefundBand = (typeof REFUND_BANDS)[number];
 export const REFUND_STATUSES = ["requested", "processing", "processed", "failed"] as const;
 export type RefundStatus = (typeof REFUND_STATUSES)[number];
 
-/** Airbnb default check-in clock, same zone as payout eligibility. */
 export const CHECK_IN_HOUR_IST = 15;
 
 export type RefundQuote = {

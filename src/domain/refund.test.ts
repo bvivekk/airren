@@ -11,8 +11,6 @@ import {
 const CHECK_IN = "2026-10-15";
 const TOTAL_PAISE = 15_090_000;
 const ODD_PAISE = 5;
-
-/** 2026-10-15 15:00 Asia/Kolkata */
 const CHECK_IN_AT = checkInInstant(CHECK_IN);
 
 function hoursBeforeCheckIn(hours: number): Date {
