@@ -442,3 +442,21 @@ entrypoint = "./functions/verify-razorpay-signature/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/verify-razorpay-signature/*.html" ]
+
+[functions.save-payout-account]
+enabled = true
+verify_jwt = false
+import_map = "./functions/save-payout-account/deno.json"
+entrypoint = "./functions/save-payout-account/index.ts"
+
+[functions.run-payouts]
+enabled = true
+verify_jwt = false
+import_map = "./functions/run-payouts/deno.json"
+entrypoint = "./functions/run-payouts/index.ts"
+
+[functions.razorpayx-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/razorpayx-webhook/deno.json"
+entrypoint = "./functions/razorpayx-webhook/index.ts"
