@@ -226,8 +226,7 @@ begin
       booking_row.host_net_paise,
       case when booking_row.host_id is null then 'on_hold' else 'scheduled' end,
       case when booking_row.host_id is null then 'no_host' end,
-      -- check-in date as midnight IST, then +38h = 14:00 IST the next day
-      (booking_row.check_in::timestamp at time zone 'Asia/Kolkata' + interval '38 hours')
+      ((booking_row.check_in + 1)::timestamp at time zone 'Asia/Kolkata' + interval '14 hours')
     )
     on conflict (booking_id) do nothing;
   end if;
