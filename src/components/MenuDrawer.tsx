@@ -60,6 +60,13 @@ export function MenuDrawer() {
               >
                 Your listings
               </Link>
+              <Link
+                href="/host/earnings"
+                className="rounded-lg px-3 py-2.5 text-[15px] text-foreground"
+                onClick={() => setMenuOpen(false)}
+              >
+                Earnings
+              </Link>
               <button
                 type="button"
                 className="rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold"

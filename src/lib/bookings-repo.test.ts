@@ -13,9 +13,7 @@ describe("parseBooking", () => {
       guests: 2,
       nights: 3,
       subtotal_paise: 15090000,
-      service_fee_paise: 754500,
-      cleaning_fee_paise: 1200000,
-      total_paise: 17044500,
+      total_paise: 15090000,
       razorpay_order_id: "order_1",
       expires_at: "2026-10-01T12:00:00.000Z",
       status: "pending_payment",
@@ -24,6 +22,7 @@ describe("parseBooking", () => {
     });
     assert.equal(booking.homeName, "Sterling Canopy");
     assert.equal(booking.nights, 3);
+    assert.equal(booking.totalPaise, 15_090_000);
     assert.equal(booking.status, "pending_payment");
   });
 });

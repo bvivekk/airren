@@ -1,12 +1,14 @@
-export const CLEANING_FEE_PAISE = 1_200_000;
-export const SERVICE_FEE_BPS = 500;
+export const HOST_COMMISSION_BPS = 1_000;
 
 export type StayQuote = {
   nights: number;
   subtotalPaise: number;
-  serviceFeePaise: number;
-  cleaningFeePaise: number;
   totalPaise: number;
+};
+
+export type HostEarnings = {
+  commissionPaise: number;
+  hostNetPaise: number;
 };
 
 export function quoteStay(nightlyRatePaise: number, nights: number): StayQuote {
@@ -14,19 +16,22 @@ export function quoteStay(nightlyRatePaise: number, nights: number): StayQuote {
     return {
       nights: 0,
       subtotalPaise: 0,
-      serviceFeePaise: 0,
-      cleaningFeePaise: 0,
       totalPaise: 0,
     };
   }
   const subtotalPaise = nightlyRatePaise * nights;
-  const serviceFeePaise = Math.round((subtotalPaise * SERVICE_FEE_BPS) / 10_000);
   return {
     nights,
     subtotalPaise,
-    serviceFeePaise,
-    cleaningFeePaise: CLEANING_FEE_PAISE,
-    totalPaise: subtotalPaise + serviceFeePaise + CLEANING_FEE_PAISE,
+    totalPaise: subtotalPaise,
+  };
+}
+
+export function hostEarningsFor(subtotalPaise: number): HostEarnings {
+  const commissionPaise = Math.round((subtotalPaise * HOST_COMMISSION_BPS) / 10_000);
+  return {
+    commissionPaise,
+    hostNetPaise: subtotalPaise - commissionPaise,
   };
 }
 
