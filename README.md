@@ -27,8 +27,10 @@ npm run lint
 npm run build
 ```
 
-## Preview
+## Production
 
-Preview: [https://airren-rjk1995ig-bvivekks-projects.vercel.app](https://airren-rjk1995ig-bvivekks-projects.vercel.app)
+Open [https://airren.in/](https://airren.in/). `www.airren.in` redirects to that origin.
 
-Production was not promoted. The older production deploy is unchanged.
+Set `NEXT_PUBLIC_AIRREN_APEX=airren.in` in `.env.local` and on the Vercel production environment. After DNS is live, run `clerk deploy --mode human` in a real terminal so Clerk allows `https://airren.in` and `https://airren.in/sso-callback`.
+
+Preview aliases stay on `*.vercel.app` and stay behind deployment protection.
