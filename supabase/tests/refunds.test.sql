@@ -1,5 +1,5 @@
 begin;
-select plan(31);
+select plan(33);
 
 select is(
   quote_refund(
@@ -485,6 +485,50 @@ select throws_ok(
   'P0001',
   'payout_in_flight',
   'processing payout with a provider id blocks cancel'
+);
+
+insert into bookings (
+  id, home_id, guest_id, host_id, check_in, check_out, guests, nights,
+  subtotal_paise, commission_paise, host_net_paise, total_paise,
+  razorpay_order_id, status
+) values (
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03',
+  '33333333-3333-4333-8333-333333333333',
+  'guest_refund',
+  'host_refund',
+  current_date + 60,
+  current_date + 63,
+  2,
+  3,
+  15090000,
+  1509000,
+  13581000,
+  15090000,
+  'order_refund_claimed',
+  'confirmed'
+);
+
+insert into payouts (
+  booking_id, host_id, amount_paise, status, eligible_at
+) values (
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03',
+  'host_refund',
+  13581000,
+  'processing',
+  now() - interval '1 minute'
+);
+
+select throws_ok(
+  $$ select cancel_booking('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03') $$,
+  'P0001',
+  'payout_in_flight',
+  'claimed payout without a provider id blocks cancel'
+);
+
+select is(
+  (select amount_paise from payouts where booking_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03'),
+  13581000,
+  'a claimed payout amount stays put when cancel is refused'
 );
 
 select set_config('request.jwt.claims', '{"sub":"stranger","role":"authenticated"}', true);
