@@ -76,9 +76,11 @@ export function parsePublicSite(rawApex: unknown): PublicSite {
   };
 }
 
-export function publicSite(
-  env: { NEXT_PUBLIC_AIRREN_APEX?: unknown } = process.env,
-): PublicSite {
+type SiteEnv = {
+  readonly NEXT_PUBLIC_AIRREN_APEX?: unknown;
+};
+
+export function publicSite(env: SiteEnv = process.env as SiteEnv): PublicSite {
   return parsePublicSite(env.NEXT_PUBLIC_AIRREN_APEX);
 }
 
