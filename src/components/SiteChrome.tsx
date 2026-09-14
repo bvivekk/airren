@@ -3,6 +3,7 @@ import { ChromeProvider } from "@/components/ChromeProvider";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { MenuDrawer } from "@/components/MenuDrawer";
+import { MobileChrome } from "@/components/mobile/MobileChrome";
 import { SignInModal } from "@/components/SignInModal";
 import type { ReactNode } from "react";
 
@@ -15,12 +16,21 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       >
         Skip to search
       </a>
-      <Header />
-      <MenuDrawer />
+      <div className="hidden md:block">
+        <Header />
+      </div>
+      <div className="hidden md:block">
+        <MenuDrawer />
+      </div>
+      <MobileChrome />
       <SignInModal />
-      <div className="flex-1">{children}</div>
-      <Footer />
-      <ChatWidget />
+      <div className="mobile-tab-pad flex-1">{children}</div>
+      <div className="hidden md:block">
+        <Footer />
+      </div>
+      <div className="hidden md:block">
+        <ChatWidget />
+      </div>
     </ChromeProvider>
   );
 }

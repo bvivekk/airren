@@ -3,6 +3,7 @@ import { PhotoGrid } from "@/components/PhotoGrid";
 import { BookingCard } from "@/components/BookingCard";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
+import { HomeViewTracker } from "@/features/mobile-explore/recently-viewed-store";
 import { parseStayQuery } from "@/lib/query";
 import { badgeLabel, type Home } from "@/domain/home";
 import { getHomeBySlug } from "@/lib/homes-repo";
@@ -37,6 +38,7 @@ export default async function HomeDetailPage({
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-6 md:px-8 md:py-8">
+      <HomeViewTracker slug={home.slug} />
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight md:text-[26px]">{home.name}</h1>
         <div className="flex shrink-0 items-center gap-4 pt-1">

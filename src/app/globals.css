@@ -9,6 +9,8 @@
   --savings: #1f8a4c;
   --link: #2f7ae5;
   --surface-secondary: #f4f4f4;
+  --nav-active: #ff385c;
+  --tab-bar-height: 4.75rem;
 }
 
 @theme inline {
@@ -20,6 +22,7 @@
   --color-savings: var(--savings);
   --color-link: var(--link);
   --color-surface-secondary: var(--surface-secondary);
+  --color-nav-active: var(--nav-active);
   --font-sans: var(--font-instrument);
 }
 
@@ -43,6 +46,12 @@ body {
   width: 100%;
   max-width: 1832px;
   padding-inline: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .mobile-tab-pad {
+    padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (min-width: 64rem) {

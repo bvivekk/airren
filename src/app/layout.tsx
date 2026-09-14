@@ -1,5 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     template: "%s · Airren",
   },
   description: "Guest-first travel. Only the best homes. 24/7 concierge. Transparent stay quotes.",
+};
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
