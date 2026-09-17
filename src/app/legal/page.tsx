@@ -1,4 +1,7 @@
-export const metadata = { title: "Legal" };
+export const metadata = {
+  title: "Legal",
+  alternates: { canonical: "/legal" },
+};
 
 export default function LegalPage() {
   return (

@@ -3,7 +3,10 @@ import { StartListingButton } from "@/components/StartListingButton";
 import { getHomeBySlug, listHomes } from "@/lib/homes-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "List on Airren" };
+export const metadata = {
+  title: "List on Airren",
+  alternates: { canonical: "/list" },
+};
 export const dynamic = "force-dynamic";
 
 const STATS = [

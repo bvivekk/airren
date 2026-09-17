@@ -7,6 +7,10 @@ import { createServerClient } from "@/lib/supabase/server";
 
 const HERO = "/images/homepage-hero.jpg";
 
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {

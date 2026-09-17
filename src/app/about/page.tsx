@@ -1,6 +1,9 @@
 import Image from "next/image";
 
-export const metadata = { title: "About" };
+export const metadata = {
+  title: "About",
+  alternates: { canonical: "/about" },
+};
 
 const TEAM = [
   { name: "Amina Cole", role: "Founder & CEO" },

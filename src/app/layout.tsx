@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { SiteChrome } from "@/components/SiteChrome";
+import { SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
 
 const instrument = Instrument_Sans({
@@ -12,6 +13,7 @@ const instrument = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: "Airren",
     template: "%s · Airren",

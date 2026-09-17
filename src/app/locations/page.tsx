@@ -3,7 +3,10 @@ import { CATEGORIES } from "@/data/categories";
 import { listHomes } from "@/lib/homes-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Locations" };
+export const metadata = {
+  title: "Locations",
+  alternates: { canonical: "/locations" },
+};
 export const dynamic = "force-dynamic";
 
 const PAGES = [
