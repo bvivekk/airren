@@ -3,7 +3,10 @@ import Link from "next/link";
 import { getHomeBySlug, listHomes } from "@/lib/homes-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "AirrenOS" };
+export const metadata = {
+  title: "AirrenOS",
+  alternates: { canonical: "/os" },
+};
 export const dynamic = "force-dynamic";
 
 export default async function OsPage() {

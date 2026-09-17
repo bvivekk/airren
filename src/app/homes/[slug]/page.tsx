@@ -18,7 +18,10 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const home = await getHomeBySlug(createServerClient(), slug);
-  return { title: home?.name ?? "Home" };
+  return {
+    title: home?.name ?? "Home",
+    alternates: { canonical: `/homes/${slug}` },
+  };
 }
 
 export default async function HomeDetailPage({

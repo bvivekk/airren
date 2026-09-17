@@ -8,7 +8,10 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return { title: getPost(slug)?.title ?? "Post" };
+  return {
+    title: getPost(slug)?.title ?? "Post",
+    alternates: { canonical: `/blog/${slug}` },
+  };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -1,6 +1,9 @@
 import { LogoMark } from "@/components/Logo";
 
-export const metadata = { title: "Download the app" };
+export const metadata = {
+  title: "Download the app",
+  alternates: { canonical: "/download" },
+};
 
 function StoreRow({ label }: { label: string }) {
   return (
