@@ -1,15 +1,29 @@
 "use client";
 
-import { useSession } from "@clerk/nextjs";
+import { useSession, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Booking } from "@/domain/booking";
+import { paymentProviderLabel, paymentStatusLabel } from "@/domain/payment";
 import type { RefundStatus, Trip } from "@/domain/refund";
 import { canGuestCancel, quoteRefund } from "@/domain/refund";
 import { clerkSupabaseJwtTemplate } from "@/lib/clerk-supabase";
 import { formatInr } from "@/lib/money";
+import { requestStayRefund, resumeStayPayment, verifyStayCheckout } from "@/lib/payments/checkout-client";
+import { guestCheckoutContact } from "@/lib/phone";
+import { openRazorpayCheckout } from "@/lib/razorpay-checkout";
 import { useSupabaseClient } from "@/lib/supabase/browser";
 import { getTripById } from "@/lib/trips-repo";
+
+function holdOpen(booking: Booking, now: number): boolean {
+  if (booking.status !== "pending_payment") {
+    return false;
+  }
+  if (!booking.expiresAt) {
+    return true;
+  }
+  return Date.parse(booking.expiresAt) > now;
+}
 
 function statusCopy(booking: Booking): { kicker: string; title: string; detail: string | null } {
   switch (booking.status) {
@@ -17,7 +31,7 @@ function statusCopy(booking: Booking): { kicker: string; title: string; detail: 
       return {
         kicker: "Waiting for payment",
         title: `Finish paying for ${booking.homeName}`,
-        detail: "Razorpay is capturing the payment. This page updates when the stay is confirmed.",
+        detail: "Pay in INR to confirm the stay. This page updates when Razorpay verifies the payment.",
       };
     case "confirmed":
       return {
@@ -94,15 +108,28 @@ function cancelErrorCopy(message: string): string {
   }
 }
 
-export function BookingStatus({ initial }: { initial: Trip }) {
+export function BookingStatus({
+  initial,
+  paymentsEnabled,
+  paymentResult,
+}: {
+  initial: Trip;
+  paymentsEnabled: boolean;
+  paymentResult: "success" | "failed" | null;
+}) {
   const { session } = useSession();
+  const { user } = useUser();
   const supabase = useSupabaseClient();
   const [trip, setTrip] = useState(initial);
   const [pending, setPending] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(paymentResult);
   const booking = trip.booking;
-  const quote = quoteRefund(trip.policy, new Date(), booking.checkIn, booking.totalPaise);
-  const showCancel = booking.status === "confirmed" && canGuestCancel(new Date(), booking.checkIn);
+  const now = new Date();
+  const payable = paymentsEnabled && holdOpen(booking, now.getTime());
+  const quote = quoteRefund(trip.policy, now, booking.checkIn, booking.totalPaise);
+  const showCancel = booking.status === "confirmed" && canGuestCancel(now, booking.checkIn);
 
   useEffect(() => {
     if (booking.status !== "pending_payment") {
@@ -139,7 +166,65 @@ export function BookingStatus({ initial }: { initial: Trip }) {
     if (next) {
       setTrip(next);
     }
+    if (next?.booking.status === "canceled") {
+      try {
+        await requestStayRefund(booking.id);
+        const refreshed = await getTripById(supabase, booking.id);
+        if (refreshed) {
+          setTrip(refreshed);
+        }
+      } catch (refundError) {
+        console.error("refund", refundError instanceof Error ? refundError.message : refundError);
+      }
+    }
     setPending(false);
+  };
+
+  const payStay = async () => {
+    setPaying(true);
+    setError("");
+    setNotice(null);
+    try {
+      const stay = await resumeStayPayment(booking.id);
+      let settled = false;
+      const finish = async (result: "success" | "failed" | null) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        const next = await getTripById(supabase, booking.id);
+        if (next) {
+          setTrip(next);
+        }
+        setNotice(result);
+        setPaying(false);
+      };
+      await openRazorpayCheckout({
+        checkout: stay,
+        description: booking.homeName,
+        email: user?.primaryEmailAddress?.emailAddress,
+        contact: guestCheckoutContact(user?.primaryPhoneNumber?.phoneNumber),
+        onPaid: (response) => {
+          void verifyStayCheckout({
+            bookingId: booking.id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          })
+            .then(() => finish("success"))
+            .catch(() => finish("failed"));
+        },
+        onFailed: () => {
+          void finish("failed");
+        },
+        onDismiss: () => {
+          void finish(null);
+        },
+      });
+    } catch (payError) {
+      setPaying(false);
+      setError(payError instanceof Error ? payError.message : "Could not open Razorpay.");
+    }
   };
 
   const copy = statusCopy(booking);
@@ -156,6 +241,44 @@ export function BookingStatus({ initial }: { initial: Trip }) {
         {booking.checkIn} – {booking.checkOut} · {booking.guests} guests · {formatInr(booking.totalPaise)}
       </p>
       {copy.detail ? <p className="mt-6 text-sm text-muted">{copy.detail}</p> : null}
+      {notice === "success" ? <p className="mt-4 text-sm text-muted">Payment received.</p> : null}
+      {notice === "failed" ? <p className="mt-4 text-sm text-muted">Payment did not go through. You can try again.</p> : null}
+      {trip.payment ? (
+        <div className="mt-8 rounded-2xl border border-line px-5 py-4 text-sm">
+          <p className="font-medium">
+            Payment · {paymentStatusLabel(trip.payment.status)}
+          </p>
+          <p className="mt-2 text-muted">
+            {formatInr(trip.payment.amountPaise)} {trip.payment.currency} via {paymentProviderLabel(trip.payment.provider)}
+          </p>
+          <p className="mt-1 text-muted">Order {trip.payment.orderId}</p>
+          {trip.payment.paymentId ? <p className="mt-1 text-muted">Payment {trip.payment.paymentId}</p> : null}
+          <p className="mt-1 text-muted">{trip.payment.createdAt.slice(0, 16).replace("T", " ")} UTC</p>
+        </div>
+      ) : null}
+      {booking.status === "pending_payment" ? (
+        <div className="mt-8">
+          {payable ? (
+            <button
+              type="button"
+              className="rounded-full bg-foreground px-5 py-3 text-sm text-white disabled:opacity-40"
+              disabled={paying}
+              onClick={() => {
+                void payStay();
+              }}
+            >
+              {paying ? "Opening checkout…" : "Pay now"}
+            </button>
+          ) : (
+            <p className="text-sm text-muted">
+              {paymentsEnabled
+                ? "This hold has expired. Start a new reserve if you still want the home."
+                : "Payments are unavailable until Razorpay is configured."}
+            </p>
+          )}
+          {error ? <p className="mt-3 text-sm text-muted">{error}</p> : null}
+        </div>
+      ) : null}
       {booking.status === "canceled" && trip.refund ? (
         <p className="mt-4 text-sm text-muted">
           Refund of {formatInr(trip.refund.amountPaise)} is {refundStatusLabel(trip.refund.status)}.

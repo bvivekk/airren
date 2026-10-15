@@ -7,6 +7,7 @@ import { HomeViewTracker } from "@/features/mobile-explore/recently-viewed-store
 import { parseStayQuery } from "@/lib/query";
 import { badgeLabel, type Home } from "@/domain/home";
 import { getHomeBySlug } from "@/lib/homes-repo";
+import { paymentsConfigured } from "@/lib/payments/config";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -103,7 +104,13 @@ export default async function HomeDetailPage({
           </ul>
         </div>
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <BookingCard home={home} checkIn={query.checkIn} checkOut={query.checkOut} guests={query.guests} />
+          <BookingCard
+            home={home}
+            checkIn={query.checkIn}
+            checkOut={query.checkOut}
+            guests={query.guests}
+            paymentsEnabled={paymentsConfigured()}
+          />
         </div>
       </div>
     </main>

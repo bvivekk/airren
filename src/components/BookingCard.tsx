@@ -1,49 +1,33 @@
 "use client";
 
-import { useSession, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Home } from "@/domain/home";
 import { useChrome } from "@/components/ChromeProvider";
-import { clerkSupabaseJwtTemplate } from "@/lib/clerk-supabase";
 import { nightsBetween } from "@/lib/dates";
 import { formatInr } from "@/lib/money";
+import { requestStayCheckout, verifyStayCheckout } from "@/lib/payments/checkout-client";
 import { guestCheckoutContact } from "@/lib/phone";
 import { quoteStay } from "@/lib/pricing";
-import { openRazorpayCheckout, type StayCheckout } from "@/lib/razorpay-checkout";
-import { useSupabaseClient } from "@/lib/supabase/browser";
-
-async function stayCheckoutInvokeError(error: { message?: string; context?: Response }): Promise<string> {
-  const context = error.context;
-  if (context) {
-    try {
-      const body = (await context.json()) as { error?: string };
-      if (typeof body.error === "string" && body.error.length > 0) {
-        return body.error;
-      }
-    } catch {
-      // The generic supabase-js message is the fallback.
-    }
-  }
-  return error.message || "Could not start checkout.";
-}
+import { openRazorpayCheckout } from "@/lib/razorpay-checkout";
 
 export function BookingCard({
   home,
   checkIn,
   checkOut,
   guests,
+  paymentsEnabled,
 }: {
   home: Home;
   checkIn: string;
   checkOut: string;
   guests: number;
+  paymentsEnabled: boolean;
 }) {
   const router = useRouter();
   const { isSignedIn, user } = useUser();
-  const { session } = useSession();
   const { setSignInOpen } = useChrome();
-  const supabase = useSupabaseClient();
   const [inDate, setInDate] = useState(checkIn);
   const [outDate, setOutDate] = useState(checkOut);
   const [who, setWho] = useState(guests);
@@ -53,50 +37,62 @@ export function BookingCard({
   const quote = useMemo(() => quoteStay(home.nightlyRatePaise, nights), [home.nightlyRatePaise, nights]);
 
   const startCheckout = async () => {
-    if (quote.nights <= 0 || who < 1 || who > home.guests) {
+    if (!paymentsEnabled || quote.nights <= 0 || who < 1 || who > home.guests) {
       return;
     }
     setPending(true);
     setError("");
-    const token = (await session?.getToken({ template: clerkSupabaseJwtTemplate })) ?? null;
-    const { data, error: invokeError } = await supabase.functions.invoke("create-stay-checkout", {
-      body: {
+    let bookingId = "";
+    try {
+      const stay = await requestStayCheckout({
         homeId: home.id,
         checkIn: inDate,
         checkOut: outDate,
         guests: who,
-      },
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (invokeError) {
-      setPending(false);
-      setError(await stayCheckoutInvokeError(invokeError));
-      return;
-    }
-    const checkout = data as StayCheckout | { error?: string } | null;
-    if (!checkout || ("error" in checkout && checkout.error)) {
-      setPending(false);
-      setError((checkout && "error" in checkout && checkout.error) || "Could not start checkout.");
-      return;
-    }
-    const stay = checkout as StayCheckout;
-    try {
+      });
+      bookingId = stay.bookingId;
+      let settled = false;
+      const finish = (path: string) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        setPending(false);
+        router.push(path);
+      };
       await openRazorpayCheckout({
         checkout: stay,
         description: home.name,
         email: user?.primaryEmailAddress?.emailAddress,
         contact: guestCheckoutContact(user?.primaryPhoneNumber?.phoneNumber),
-        onPaid: () => {
-          router.push(`/bookings/${stay.bookingId}`);
+        onPaid: (response) => {
+          void verifyStayCheckout({
+            bookingId: stay.bookingId,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          })
+            .then(() => {
+              finish(`/bookings/${stay.bookingId}?payment=success`);
+            })
+            .catch(() => {
+              finish(`/bookings/${stay.bookingId}?payment=failed`);
+            });
+        },
+        onFailed: () => {
+          finish(`/bookings/${stay.bookingId}?payment=failed`);
         },
         onDismiss: () => {
-          router.push(`/bookings/${stay.bookingId}`);
+          finish(`/bookings/${stay.bookingId}`);
         },
       });
     } catch (checkoutError) {
-      setError(checkoutError instanceof Error ? checkoutError.message : "Could not open Razorpay.");
-    } finally {
       setPending(false);
+      if (bookingId) {
+        router.push(`/bookings/${bookingId}`);
+        return;
+      }
+      setError(checkoutError instanceof Error ? checkoutError.message : "Could not start checkout.");
     }
   };
 
@@ -152,8 +148,11 @@ export function BookingCard({
       <button
         type="button"
         className="mt-4 w-full rounded-full bg-foreground py-3 text-sm font-medium text-white disabled:opacity-40"
-        disabled={quote.nights === 0 || who < 1 || who > home.guests || pending}
+        disabled={!paymentsEnabled || quote.nights === 0 || who < 1 || who > home.guests || pending}
         onClick={() => {
+          if (!paymentsEnabled) {
+            return;
+          }
           if (!isSignedIn) {
             setSignInOpen(true);
             return;
@@ -161,11 +160,13 @@ export function BookingCard({
           void startCheckout();
         }}
       >
-        Reserve
+        {pending ? "Opening checkout…" : "Reserve"}
       </button>
       {error ? <p className="mt-3 text-center text-xs text-muted">{error}</p> : null}
       <p className="mt-3 text-center text-xs text-muted">
-        Pay in INR. On a phone, Reserve can open Google Pay or PhonePe. The stay confirms after payment is captured.
+        {paymentsEnabled
+          ? "Pay in INR with UPI, cards, or netbanking. The stay confirms after Razorpay verifies the payment."
+          : "Payments are unavailable until Razorpay is configured."}
       </p>
       {quote.nights > 0 ? (
         <dl className="mt-4 space-y-2 text-sm">

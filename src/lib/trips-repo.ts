@@ -8,6 +8,8 @@ import {
 } from "../domain/refund.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseBooking } from "./bookings-repo.ts";
+import { parsePayments } from "./payments-repo.ts";
+import { pickDisplayPayment } from "../domain/payment.ts";
 
 const TRIP_SELECT = `
   id,
@@ -26,7 +28,22 @@ const TRIP_SELECT = `
   canceled_by,
   created_at,
   homes ( name, slug, cancellation_policy ),
-  refunds ( id, booking_id, amount_paise, status, actor, policy_applied, razorpay_refund_id )
+  refunds ( id, booking_id, amount_paise, status, actor, policy_applied, razorpay_refund_id ),
+  payments (
+    id,
+    booking_id,
+    guest_id,
+    provider,
+    provider_order_id,
+    provider_payment_id,
+    razorpay_order_id,
+    razorpay_payment_id,
+    amount_paise,
+    currency,
+    status,
+    created_at,
+    updated_at
+  )
 `;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -132,6 +149,7 @@ export function parseTrip(row: unknown): Trip {
     booking,
     policy: parsePolicy(home.cancellation_policy ?? null),
     refund: refundEmbed == null ? null : parseRefund(refundEmbed),
+    payment: pickDisplayPayment(parsePayments(row.payments)),
   };
 }
 
