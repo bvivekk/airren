@@ -29,6 +29,7 @@ describe("parseTrip", () => {
     });
     assert.equal(trip.policy, "flexible");
     assert.equal(trip.refund, null);
+    assert.equal(trip.payment, null);
     assert.equal(trip.booking.status, "confirmed");
   });
 
@@ -59,5 +60,53 @@ describe("parseTrip", () => {
       policyApplied: "strict",
       razorpayRefundId: null,
     });
+    assert.equal(trip.payment, null);
+  });
+
+  it("shows the captured payment ahead of a failed attempt", () => {
+    const trip = parseTrip({
+      ...baseRow,
+      status: "confirmed",
+      canceled_at: null,
+      canceled_by: null,
+      homes: { name: "Sterling Canopy", slug: "sterling-canopy", cancellation_policy: "flexible" },
+      refunds: null,
+      payments: [
+        {
+          id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+          booking_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          guest_id: "user_abc",
+          provider: "razorpay",
+          provider_order_id: "order_1",
+          provider_payment_id: null,
+          razorpay_order_id: "order_1",
+          razorpay_payment_id: null,
+          amount_paise: 15090000,
+          currency: "INR",
+          status: "failed",
+          created_at: "2026-10-02T00:00:00.000Z",
+          updated_at: "2026-10-02T00:00:00.000Z",
+        },
+        {
+          id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+          booking_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          guest_id: "user_abc",
+          provider: "razorpay",
+          provider_order_id: "order_1",
+          provider_payment_id: "pay_1",
+          razorpay_order_id: "order_1",
+          razorpay_payment_id: "pay_1",
+          amount_paise: 15090000,
+          currency: "INR",
+          status: "captured",
+          created_at: "2026-10-01T00:00:00.000Z",
+          updated_at: "2026-10-01T00:00:00.000Z",
+        },
+      ],
+    });
+    assert.equal(trip.payment?.status, "captured");
+    assert.equal(trip.payment?.paymentId, "pay_1");
+    assert.equal(trip.payment?.currency, "INR");
+    assert.equal(trip.payment?.guestId, "user_abc");
   });
 });

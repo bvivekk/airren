@@ -1,4 +1,5 @@
 import type { Booking, CancelActor } from "./booking.ts";
+import type { Payment } from "./payment.ts";
 import { hostEarningsFor } from "../lib/pricing.ts";
 
 export const CANCELLATION_POLICIES = ["flexible", "strict"] as const;
@@ -37,6 +38,7 @@ export type Trip = {
   booking: Booking;
   policy: CancellationPolicy;
   refund: Refund | null;
+  payment: Payment | null;
 };
 
 export type CancelStayResult = {

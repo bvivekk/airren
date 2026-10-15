@@ -38,6 +38,7 @@ export type RazorpayDisplayConfig = {
 
 type RazorpayCheckout = {
   open: () => void;
+  on: (event: "payment.failed", handler: () => void) => void;
 };
 
 type RazorpayConstructor = new (options: {
@@ -112,13 +113,20 @@ export async function loadRazorpayCheckout(): Promise<RazorpayConstructor> {
   return loaded;
 }
 
+export type RazorpayPaidResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
 export async function openRazorpayCheckout(options: {
   checkout: StayCheckout;
   description: string;
   email?: string;
   contact?: string;
-  onPaid: () => void;
+  onPaid: (response: RazorpayPaidResponse) => void;
   onDismiss: () => void;
+  onFailed?: () => void;
 }): Promise<void> {
   const Razorpay = await loadRazorpayCheckout();
   const widget = new Razorpay({
@@ -139,8 +147,8 @@ export async function openRazorpayCheckout(options: {
     },
     method: razorpayCheckoutMethods(),
     config: razorpayUpiAppDisplay(),
-    handler: () => {
-      options.onPaid();
+    handler: (response) => {
+      options.onPaid(response);
     },
     modal: {
       ondismiss: () => {
@@ -148,6 +156,9 @@ export async function openRazorpayCheckout(options: {
       },
     },
     theme: { color: "#111111" },
+  });
+  widget.on("payment.failed", () => {
+    options.onFailed?.();
   });
   widget.open();
 }

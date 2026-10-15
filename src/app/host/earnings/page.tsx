@@ -1,8 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { PayoutAccountForm } from "@/components/PayoutAccountForm";
+import { paymentStatusLabel } from "@/domain/payment";
 import type { HostEarning } from "@/domain/payout";
 import { getMyPayoutAccount, listHostEarnings, payoutStatusLabel } from "@/lib/host-earnings-repo";
 import { formatInr } from "@/lib/money";
+import { listGuestPaymentSnapshots } from "@/lib/payments-repo";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +28,11 @@ export default async function HostEarningsPage() {
 
   const client = createServerClient();
   const [earnings, account] = await Promise.all([listHostEarnings(client), getMyPayoutAccount(client)]);
+  const payments = await listGuestPaymentSnapshots(
+    client,
+    earnings.map((earning) => earning.bookingId),
+  );
+  const paymentByBooking = new Map(payments.map((payment) => [payment.bookingId, payment]));
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
@@ -38,16 +45,24 @@ export default async function HostEarningsPage() {
         <p className="mt-8 text-muted">No confirmed stays yet.</p>
       ) : (
         <ul className="mt-8 space-y-4">
-          {earnings.map((earning) => (
-            <li key={earning.bookingId} className="rounded-3xl border border-line bg-white px-5 py-4">
-              <p className="text-sm font-medium text-savings">{payoutStatusLabel(earning.payoutStatus)}</p>
-              <p className="mt-1 text-lg font-semibold">{earning.homeName}</p>
-              <p className="mt-1 text-sm text-muted">{earningDetail(earning)}</p>
-              <p className="mt-3 text-sm">
-                {formatInr(earning.hostNetPaise)} after {formatInr(earning.commissionPaise)} commission
-              </p>
-            </li>
-          ))}
+          {earnings.map((earning) => {
+            const payment = paymentByBooking.get(earning.bookingId);
+            return (
+              <li key={earning.bookingId} className="rounded-3xl border border-line bg-white px-5 py-4">
+                <p className="text-sm font-medium text-savings">{payoutStatusLabel(earning.payoutStatus)}</p>
+                <p className="mt-1 text-lg font-semibold">{earning.homeName}</p>
+                <p className="mt-1 text-sm text-muted">{earningDetail(earning)}</p>
+                <p className="mt-3 text-sm">
+                  {formatInr(earning.hostNetPaise)} after {formatInr(earning.commissionPaise)} commission
+                </p>
+                {payment ? (
+                  <p className="mt-1 text-sm text-muted">
+                    Guest payment: {paymentStatusLabel(payment.status)} · {formatInr(payment.amountPaise)}
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>

@@ -51,10 +51,10 @@ describe("parseStayQuery", () => {
   it("resolves a flexible week from the first of a future month", () => {
     const query = parseStayQuery({
       stay: "week",
-      months: "2026-10",
+      months: "2030-01",
     });
-    assert.equal(query.checkIn, "2026-10-01");
-    assert.equal(query.checkOut, "2026-10-08");
+    assert.equal(query.checkIn, "2030-01-01");
+    assert.equal(query.checkOut, "2030-01-08");
   });
 
   it("ignores stale past dates on a flexible search", () => {

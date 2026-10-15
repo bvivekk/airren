@@ -12,13 +12,37 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). Copy `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from `supabase start` into `.env.local`.
 
-Checkout needs Edge Functions and Razorpay test secrets:
+Guest checkout runs in the Next.js app. Copy the Razorpay and Supabase values below into `.env.local`. Leave the Razorpay values empty to run the app with payments turned off: Reserve stays disabled and no order is created.
+
+```
+NEXT_PUBLIC_RAZORPAY_KEY_ID=
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+`NEXT_PUBLIC_RAZORPAY_KEY_ID` and `RAZORPAY_KEY_ID` are the same test key id. The secret and webhook secret stay on the server. `SUPABASE_SERVICE_ROLE_KEY` lets the app confirm a booking after the payment signature checks out. Never commit live or test secrets.
+
+In the Razorpay dashboard, switch to **Test mode** and create API keys. Add a webhook pointing at `https://<your-host>/api/webhooks/razorpay` (locally, expose port 3000 with a tunnel). Subscribe to `payment.captured`, `payment.failed`, and `refund.processed`. The test-mode webhook OTP is `754081`. The signature header is `X-Razorpay-Signature`.
+
+Pay a stay from a home page. Checkout opens Razorpay for UPI, cards, and netbanking. The server prices the stay from the nightly rate, and the booking stays `pending_payment` until that signature is verified or the webhook captures the payment. A confirmed stay can be canceled from the trip page; a refundable cancel is sent to Razorpay as a refund for the amount stored on the cancellation, which is the full charge when the policy says so.
+
+Test mode does not move real money:
+
+- UPI success: `success@razorpay`
+- UPI failure: `failure@razorpay`
+- Domestic cards (any future expiry, any CVV): Visa `4100 2800 0000 1007`, Mastercard `5500 6700 0000 1002`, RuPay `6527 6589 0000 1005`. The test checkout shows a mock bank page with success and failure buttons.
+
+Live mode needs Razorpay KYC and a live key pair. International cards are a later Stripe provider; only Razorpay is implemented.
+
+Host payouts and the refund worker still use Edge Functions when you run them:
 
 ```bash
 npx supabase functions serve --no-verify-jwt
 ```
 
-Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `CLERK_JWT_ISSUER`, and `NEXT_PUBLIC_RAZORPAY_KEY_ID` locally. The webhook URL is `/functions/v1/razorpay-webhook`.
+Set `CLERK_JWT_ISSUER` for those functions. The functions webhook remains `/functions/v1/razorpay-webhook` if you deploy functions; the Next.js webhook above is the one the app uses, and repeated deliveries of the same event are ignored.
 
 ```bash
 npm test
