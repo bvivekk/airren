@@ -1,5 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { razorpayKeyAllowed } from "../_shared/razorpay-mode.ts";
 import { createRefund } from "../_shared/razorpay-refunds.ts";
 
 type ClaimedRefund = {
@@ -31,7 +32,9 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !serviceKey) {
     return new Response("refunds are not configured", { status: 500 });
   }
-  if (!Deno.env.get("RAZORPAY_KEY_ID") || !Deno.env.get("RAZORPAY_KEY_SECRET")) {
+  const razorpayKeyId = Deno.env.get("RAZORPAY_KEY_ID") ?? "";
+  const razorpayMode = Deno.env.get("RAZORPAY_MODE") ?? "";
+  if (!razorpayKeyId || !Deno.env.get("RAZORPAY_KEY_SECRET") || !razorpayKeyAllowed(razorpayKeyId, razorpayMode)) {
     return new Response("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are not configured", { status: 500 });
   }
 
@@ -39,7 +42,7 @@ Deno.serve(async (req) => {
   const { data, error } = await admin.rpc("claim_pending_refunds", { p_limit: 25 });
   if (error) {
     console.error("claim_pending_refunds", error.message);
-    return new Response(error.message, { status: 400 });
+    return new Response("refunds failed", { status: 500 });
   }
 
   const claimed = (Array.isArray(data) ? data : []) as ClaimedRefund[];

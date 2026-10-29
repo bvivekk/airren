@@ -126,6 +126,7 @@ export function BookingStatus({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState(paymentResult);
   const booking = trip.booking;
+  const shownNotice = booking.status === "confirmed" && notice === "failed" ? "success" : notice;
   const now = new Date();
   const payable = paymentsEnabled && holdOpen(booking, now.getTime());
   const quote = quoteRefund(trip.policy, now, booking.checkIn, booking.totalPaise);
@@ -214,9 +215,6 @@ export function BookingStatus({
             .then(() => finish("success"))
             .catch(() => finish("failed"));
         },
-        onFailed: () => {
-          void finish("failed");
-        },
         onDismiss: () => {
           void finish(null);
         },
@@ -241,8 +239,8 @@ export function BookingStatus({
         {booking.checkIn} – {booking.checkOut} · {booking.guests} guests · {formatInr(booking.totalPaise)}
       </p>
       {copy.detail ? <p className="mt-6 text-sm text-muted">{copy.detail}</p> : null}
-      {notice === "success" ? <p className="mt-4 text-sm text-muted">Payment received.</p> : null}
-      {notice === "failed" ? <p className="mt-4 text-sm text-muted">Payment did not go through. You can try again.</p> : null}
+      {shownNotice === "success" ? <p className="mt-4 text-sm text-muted">Payment received.</p> : null}
+      {shownNotice === "failed" ? <p className="mt-4 text-sm text-muted">Payment did not go through. You can try again.</p> : null}
       {trip.payment ? (
         <div className="mt-8 rounded-2xl border border-line px-5 py-4 text-sm">
           <p className="font-medium">
