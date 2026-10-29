@@ -130,6 +130,66 @@ describe("verifyStayPayment", () => {
     assert.deepEqual(confirmed, [750_000]);
   });
 
+  it("waits out an authorization and confirms only after Razorpay captures it", async () => {
+    let fetches = 0;
+    const confirmed: number[] = [];
+    const fake = gateway({
+      fetchPayment: async () => {
+        fetches += 1;
+        return {
+          id: "pay_1",
+          orderId: "order_1",
+          amountPaise: 750_000,
+          currency: "INR",
+          status: fetches < 2 ? "authorized" : "captured",
+        };
+      },
+    });
+    await verifyStayPayment({
+      booking: booking(),
+      userId: "user_abc",
+      orderId: "order_1",
+      paymentId: "pay_1",
+      signature: "sig",
+      gateway: fake,
+      captureAttempts: 3,
+      waitForCapture: async () => {},
+      confirm: async (amountPaise) => {
+        confirmed.push(amountPaise);
+      },
+    });
+    assert.equal(fetches, 2);
+    assert.deepEqual(confirmed, [750_000]);
+  });
+
+  it("does not confirm a payment that stays authorized", async () => {
+    let fetches = 0;
+    const fake = gateway({
+      fetchPayment: async () => {
+        fetches += 1;
+        return { id: "pay_1", orderId: "order_1", amountPaise: 750_000, currency: "INR", status: "authorized" };
+      },
+    });
+    await assert.rejects(
+      () =>
+        verifyStayPayment({
+          booking: booking(),
+          userId: "user_abc",
+          orderId: "order_1",
+          paymentId: "pay_1",
+          signature: "sig",
+          gateway: fake,
+          captureAttempts: 3,
+          waitForCapture: async () => {},
+          confirm: async () => {
+            throw new Error("should not confirm");
+          },
+        }),
+      /not captured/,
+    );
+    assert.equal(fetches, 3);
+  });
+
   it("rejects a captured payment whose amount is not the stay total", async () => {
     const fake = gateway({
       fetchPayment: async () => ({ id: "pay_1", orderId: "order_1", amountPaise: 1, currency: "INR", status: "captured" }),

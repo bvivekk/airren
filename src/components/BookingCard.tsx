@@ -79,9 +79,6 @@ export function BookingCard({
               finish(`/bookings/${stay.bookingId}?payment=failed`);
             });
         },
-        onFailed: () => {
-          finish(`/bookings/${stay.bookingId}?payment=failed`);
-        },
         onDismiss: () => {
           finish(`/bookings/${stay.bookingId}`);
         },

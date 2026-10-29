@@ -1,7 +1,7 @@
 import type { Booking } from "../../domain/booking.ts";
 import { isIsoDate } from "../dates.ts";
 import { serverStayCharge } from "./amount.ts";
-import type { PaymentGateway } from "./types.ts";
+import type { GatewayPayment, PaymentGateway } from "./types.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -220,6 +220,29 @@ export function resumeStayCheckout(args: {
   };
 }
 
+const CAPTURE_ATTEMPTS = 4;
+const CAPTURE_WAIT_MS = 250;
+
+async function pause(ms: number): Promise<void> {
+  await new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function fetchPaymentForConfirm(
+  gateway: PaymentGateway,
+  paymentId: string,
+  attempts: number,
+  wait: (ms: number) => Promise<void>,
+): Promise<GatewayPayment> {
+  let payment = await gateway.fetchPayment(paymentId);
+  for (let attempt = 1; attempt < attempts && payment.status === "authorized"; attempt += 1) {
+    await wait(CAPTURE_WAIT_MS);
+    payment = await gateway.fetchPayment(paymentId);
+  }
+  return payment;
+}
+
 export async function verifyStayPayment(args: {
   booking: Booking;
   userId: string;
@@ -228,6 +251,8 @@ export async function verifyStayPayment(args: {
   signature: string;
   gateway: PaymentGateway;
   confirm: (amountPaise: number) => Promise<void>;
+  captureAttempts?: number;
+  waitForCapture?: (ms: number) => Promise<void>;
 }): Promise<void> {
   if (args.booking.guestId !== args.userId) {
     throw new PaymentFlowError("forbidden", "You cannot pay for this stay.");
@@ -241,11 +266,16 @@ export async function verifyStayPayment(args: {
   if (!args.gateway.verifyCheckoutSignature(args.orderId, args.paymentId, args.signature)) {
     throw new PaymentFlowError("bad_signature", "Payment could not be verified.");
   }
-  const payment = await args.gateway.fetchPayment(args.paymentId);
+  const payment = await fetchPaymentForConfirm(
+    args.gateway,
+    args.paymentId,
+    args.captureAttempts ?? CAPTURE_ATTEMPTS,
+    args.waitForCapture ?? pause,
+  );
   if (payment.orderId !== args.orderId || payment.currency !== "INR" || payment.amountPaise !== args.booking.totalPaise) {
     throw new PaymentFlowError("amount_rejected", "Payment amount does not match this stay.");
   }
-  if (payment.status !== "captured" && payment.status !== "authorized") {
+  if (payment.status !== "captured") {
     throw new PaymentFlowError("not_captured", "Payment was not captured.");
   }
   if (args.booking.status === "pending_payment") {

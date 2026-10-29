@@ -1,6 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { signaturesMatch } from "../_shared/hmac.ts";
+import { razorpayKeyAllowed } from "../_shared/razorpay-mode.ts";
 
 type VerifyBody = {
   razorpay_order_id?: string;
@@ -17,7 +18,8 @@ Deno.serve(async (req) => {
   }
 
   const secret = Deno.env.get("RAZORPAY_KEY_SECRET");
-  if (!secret) {
+  const keyId = Deno.env.get("RAZORPAY_KEY_ID") ?? "";
+  if (!secret || !razorpayKeyAllowed(keyId, Deno.env.get("RAZORPAY_MODE") ?? "")) {
     return jsonResponse({ error: "razorpay is not configured" }, 500);
   }
 

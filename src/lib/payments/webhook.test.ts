@@ -62,6 +62,18 @@ describe("razorpay webhook", () => {
     assert.equal(refund?.kind, "refund.processed");
     assert.equal(refund?.refundId, "rfnd_1");
     assert.equal(refund?.paymentId, "pay_1");
+    const partial = parseRazorpayWebhook(
+      JSON.stringify({
+        event: "refund.processed",
+        payload: {
+          payment: { entity: { id: "pay_1", order_id: "order_1", amount: 750000 } },
+          refund: { entity: { id: "rfnd_2", payment_id: "pay_1", amount: 100000, status: "processed" } },
+        },
+      }),
+      "evt_partial",
+    );
+    assert.equal(partial?.amountPaise, 100000);
+    assert.equal(partial?.kind, "refund.processed");
   });
 
   it("rejects a bad signature before the event is applied", async () => {
@@ -97,6 +109,17 @@ describe("razorpay webhook", () => {
     assert.equal(second.status, 200);
     assert.equal(await second.text(), "duplicate");
     assert.deepEqual(processor.applied, ["payment.captured:order_1:pay_1:750000"]);
+  });
+
+  it("rejects a refund failure that has no refund id", async () => {
+    const processor = memoryProcessor();
+    const body = JSON.stringify({ event: "refund.failed", payload: { refund: { entity: { payment_id: "pay_1" } } } });
+    const response = await handleRazorpayWebhook(signedRequest(body, "evt_refund_failed"), {
+      webhookSecret: secret,
+      processEvent: processor.processEvent,
+    });
+    assert.equal(response.status, 400);
+    assert.deepEqual(processor.applied, []);
   });
 
   it("is not configured when the webhook secret is missing", async () => {

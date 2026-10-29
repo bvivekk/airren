@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { paymentsConfigured, readRazorpayEnv } from "./config.ts";
+import { paymentsConfigured, razorpayKeyAllowed, readRazorpayEnv } from "./config.ts";
 
 const complete = {
   RAZORPAY_KEY_ID: "rzp_test_key",
@@ -25,5 +25,19 @@ describe("paymentsConfigured", () => {
 
   it("stays off when the publishable key id does not match the server key", () => {
     assert.equal(paymentsConfigured({ ...complete, NEXT_PUBLIC_RAZORPAY_KEY_ID: "rzp_test_other" }), false);
+  });
+
+  it("keeps test keys on without a mode flag and refuses live keys until RAZORPAY_MODE=live", () => {
+    assert.equal(razorpayKeyAllowed("rzp_test_key", ""), true);
+    assert.equal(paymentsConfigured({ ...complete, RAZORPAY_MODE: "test" }), true);
+    const live = {
+      ...complete,
+      RAZORPAY_KEY_ID: "rzp_live_key",
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: "rzp_live_key",
+    };
+    assert.equal(paymentsConfigured(live), false);
+    assert.equal(paymentsConfigured({ ...live, RAZORPAY_MODE: "live" }), true);
+    assert.equal(paymentsConfigured({ ...complete, RAZORPAY_MODE: "live" }), false);
+    assert.equal(razorpayKeyAllowed("key_without_prefix", ""), false);
   });
 });

@@ -2,6 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireClerkUser } from "../_shared/clerk.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import { razorpayKeyAllowed } from "../_shared/razorpay-mode.ts";
 
 type CheckoutBody = {
   homeId?: string;
@@ -36,7 +37,8 @@ Deno.serve(async (req) => {
     if (!supabaseUrl || !supabaseKey) {
       return jsonResponse({ error: "supabase is not configured" }, 500);
     }
-    if (!razorpayKeyId || !razorpayKeySecret) {
+    const razorpayMode = Deno.env.get("RAZORPAY_MODE") ?? "";
+    if (!razorpayKeyId || !razorpayKeySecret || !razorpayKeyAllowed(razorpayKeyId, razorpayMode)) {
       return jsonResponse({ error: "razorpay is not configured" }, 500);
     }
 
@@ -52,7 +54,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (homeError) {
       console.error("checkout home", homeError.message);
-      return jsonResponse({ error: homeError.message }, 400);
+      return jsonResponse({ error: "could not start checkout" }, 400);
     }
     if (!home) {
       return jsonResponse({ error: "home not found" }, 404);
@@ -70,7 +72,7 @@ Deno.serve(async (req) => {
     });
     if (quoteError) {
       console.error("checkout quote", quoteError.message);
-      return jsonResponse({ error: quoteError.message }, 400);
+      return jsonResponse({ error: "could not start checkout" }, 400);
     }
     const quote = Array.isArray(quoteRows) ? quoteRows[0] : quoteRows;
     if (!quote || typeof quote.total_paise !== "number") {
@@ -87,15 +89,19 @@ Deno.serve(async (req) => {
         amount: quote.total_paise,
         currency: "INR",
         payment_capture: true,
-        receipt: `stay_${homeId.replaceAll("-", "").slice(0, 12)}`,
+        receipt: `stay_${crypto.randomUUID().replaceAll("-", "").slice(0, 20)}`,
         notes: { home_id: homeId, check_in: checkIn, check_out: checkOut },
       }),
     });
-    const orderJson = (await orderResponse.json()) as { id?: string; error?: { description?: string } };
-    if (!orderResponse.ok || !orderJson.id) {
-      const razorpayError = orderJson.error?.description ?? "could not create razorpay order";
-      console.error("checkout razorpay", orderResponse.status, razorpayError);
-      return jsonResponse({ error: razorpayError }, 502);
+    const orderJson = (await orderResponse.json()) as {
+      id?: string;
+      amount?: number;
+      currency?: string;
+      error?: { description?: string };
+    };
+    if (!orderResponse.ok || !orderJson.id || orderJson.amount !== quote.total_paise || orderJson.currency !== "INR") {
+      console.error("checkout razorpay", orderResponse.status, orderJson.error?.description ?? "order mismatch");
+      return jsonResponse({ error: "could not create razorpay order" }, 502);
     }
 
     const { data: booking, error: bookingError } = await supabase.rpc("create_pending_booking", {
@@ -108,11 +114,17 @@ Deno.serve(async (req) => {
     if (bookingError) {
       console.error("checkout booking", bookingError.message);
       const overlap = bookingError.message.toLowerCase().includes("exclusion") || bookingError.code === "23P01";
-      return jsonResponse({ error: bookingError.message }, overlap ? 409 : 400);
+      return jsonResponse(
+        { error: overlap ? "Those dates are already reserved." : "could not start checkout" },
+        overlap ? 409 : 400,
+      );
     }
     const bookingRow = Array.isArray(booking) ? booking[0] : booking;
-    if (!bookingRow?.id) {
-      return jsonResponse({ error: "could not create booking" }, 400);
+    const bookingTotal =
+      typeof bookingRow?.total_paise === "number" ? bookingRow.total_paise : Number(bookingRow?.total_paise);
+    if (!bookingRow?.id || bookingTotal !== quote.total_paise) {
+      console.error("checkout booking total", bookingRow?.total_paise, quote.total_paise);
+      return jsonResponse({ error: "could not start checkout" }, 409);
     }
 
     return jsonResponse({
@@ -125,7 +137,9 @@ Deno.serve(async (req) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "checkout failed";
     console.error("checkout failed", message);
-    const status = message.includes("signed in") ? 401 : 400;
-    return jsonResponse({ error: message }, status);
+    if (message.includes("signed in")) {
+      return jsonResponse({ error: "Sign in to reserve." }, 401);
+    }
+    return jsonResponse({ error: "could not start checkout" }, 400);
   }
 });

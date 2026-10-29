@@ -1,6 +1,11 @@
 import { verifyRazorpayWebhookSignature } from "../razorpay.ts";
 
-export type RazorpayWebhookKind = "payment.captured" | "payment.failed" | "refund.processed" | "ignored";
+export type RazorpayWebhookKind =
+  | "payment.captured"
+  | "payment.failed"
+  | "refund.processed"
+  | "refund.failed"
+  | "ignored";
 
 export type ParsedRazorpayWebhook = {
   eventId: string;
@@ -30,6 +35,7 @@ export function webhookKind(eventType: string): RazorpayWebhookKind {
     case "payment.captured":
     case "payment.failed":
     case "refund.processed":
+    case "refund.failed":
       return eventType;
     default:
       return "ignored";
@@ -47,16 +53,21 @@ export function parseRazorpayWebhook(rawBody: string, eventId: string): ParsedRa
     return null;
   }
   const eventType = stringOrNull(payload.event) ?? "";
+  const kind = webhookKind(eventType);
   const nested = isRecord(payload.payload) ? payload.payload : null;
   const paymentEntity = isRecord(nested?.payment) && isRecord(nested.payment.entity) ? nested.payment.entity : null;
   const refundEntity = isRecord(nested?.refund) && isRecord(nested.refund.entity) ? nested.refund.entity : null;
+  const refundAmount = amountOrNull(refundEntity?.amount);
+  const paymentAmount = amountOrNull(paymentEntity?.amount);
+  const refundEvent = kind === "refund.processed" || kind === "refund.failed";
+  const amountPaise = refundEvent ? refundAmount ?? paymentAmount : paymentAmount ?? refundAmount;
   return {
     eventId,
     eventType,
-    kind: webhookKind(eventType),
-    orderId: stringOrNull(paymentEntity?.order_id),
+    kind,
+    orderId: stringOrNull(paymentEntity?.order_id) ?? stringOrNull(refundEntity?.order_id),
     paymentId: stringOrNull(paymentEntity?.id) ?? stringOrNull(refundEntity?.payment_id),
-    amountPaise: amountOrNull(paymentEntity?.amount) ?? amountOrNull(refundEntity?.amount),
+    amountPaise,
     refundId: stringOrNull(refundEntity?.id),
     payload,
   };
@@ -97,7 +108,7 @@ export async function handleRazorpayWebhook(request: Request, deps: WebhookDeps)
   if (parsed.kind === "payment.failed" && !parsed.orderId) {
     return text("missing order", 400);
   }
-  if (parsed.kind === "refund.processed" && !parsed.refundId) {
+  if ((parsed.kind === "refund.processed" || parsed.kind === "refund.failed") && !parsed.refundId) {
     return text("missing refund", 400);
   }
   try {

@@ -86,7 +86,8 @@ Deno.serve(async (req) => {
     p_amount_paise: amount ?? null,
   });
   if (error) {
-    return new Response(error.message, { status: 400 });
+    console.error("razorpay webhook", error.message);
+    return new Response("webhook failed", { status: 500 });
   }
   return new Response("ok", { status: 200 });
 });
