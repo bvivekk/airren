@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Instrument_Sans } from "next/font/google";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { SiteChrome } from "@/components/SiteChrome";
 import { SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ClerkProvider>
           <SiteChrome>{children}</SiteChrome>
         </ClerkProvider>
+        <Analytics />
       </body>
     </html>
   );
